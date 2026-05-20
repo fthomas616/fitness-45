@@ -231,7 +231,7 @@
   <div class="content" style="max-width:560px">
     <div style="text-align:center;margin-bottom:2rem">
       <div class="logo" style="font-size:3rem">45<span>DAYS</span></div>
-      <p style="color:var(--muted);margin-top:.5rem;font-family:'Space Mono',monospace;font-size:.8rem">Set up your profile to begin the challenge.</p>
+      <p id="ob-subtitle" style="color:var(--muted);margin-top:.5rem;font-family:'Space Mono',monospace;font-size:.8rem">Set up your profile to begin the challenge.</p>
     </div>
     <div class="card">
       <div class="field">
@@ -257,6 +257,7 @@
       <button class="btn btn-primary" style="margin-top:.5rem" onclick="saveProfile()">
         <span id="ob-btn-text">START MY CHALLENGE</span>
       </button>
+      <button id="ob-cancel" class="btn btn-secondary hidden" style="margin-top:.5rem" onclick="loadApp()">CANCEL</button>
     </div>
   </div>
 </div>
@@ -273,7 +274,8 @@
     </div>
     <div class="nav-user">
       <span id="nav-name" style="display:none"></span>
-      <div class="avatar-dot" id="nav-avatar"></div>
+      <div class="avatar-dot" id="nav-avatar" style="cursor:pointer" title="Edit profile" onclick="openProfileEditor()"></div>
+      <button class="btn btn-secondary btn-sm" onclick="openProfileEditor()">EDIT</button>
       <button class="btn btn-secondary btn-sm" onclick="signOut()">OUT</button>
     </div>
   </nav>
@@ -406,17 +408,38 @@ async function sendMagicLink(){
 
 async function signOut(){await sb.auth.signOut();location.reload();}
 
-function buildColorPicker(){
-  document.getElementById('color-picker').innerHTML=AVATAR_COLORS.map((c,i)=>
-    `<div class="color-swatch${i===0?' selected':''}" style="background:${c}" onclick="selectColor(this)"></div>`
+function normalizeColor(c){
+  if(!c)return '';
+  const s=String(c).trim().toLowerCase();
+  if(s.startsWith('#'))return s;
+  const m=s.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+  if(m)return '#'+[m[1],m[2],m[3]].map(n=>parseInt(n,10).toString(16).padStart(2,'0')).join('');
+  return s;
+}
+function buildColorPicker(selected){
+  const target=normalizeColor(selected||AVATAR_COLORS[0]);
+  document.getElementById('color-picker').innerHTML=AVATAR_COLORS.map(c=>
+    `<div class="color-swatch${normalizeColor(c)===target?' selected':''}" data-color="${c}" style="background:${c}" onclick="selectColor(this)"></div>`
   ).join('');
+}
+function openProfileEditor(){
+  if(!myProfile){buildColorPicker();showView('onboard');return;}
+  document.getElementById('ob-name').value=myProfile.display_name||'';
+  document.getElementById('ob-goal').value=myProfile.goal||'';
+  document.getElementById('ob-approach').value=myProfile.approach||'';
+  document.getElementById('ob-weight').value=myProfile.start_weight??'';
+  buildColorPicker(myProfile.avatar_color);
+  document.getElementById('ob-subtitle').textContent='Update your profile details.';
+  document.getElementById('ob-btn-text').textContent='SAVE CHANGES';
+  document.getElementById('ob-cancel').classList.remove('hidden');
+  showView('onboard');
 }
 function selectColor(el){
   document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
   el.classList.add('selected');
 }
 function getSelectedColor(){
-  const s=document.querySelector('.color-swatch.selected');return s?s.style.background:AVATAR_COLORS[0];
+  const s=document.querySelector('.color-swatch.selected');return s?(s.dataset.color||s.style.background):AVATAR_COLORS[0];
 }
 
 async function saveProfile(){
@@ -426,12 +449,14 @@ async function saveProfile(){
   const weight=parseFloat(document.getElementById('ob-weight').value)||null;
   const color=getSelectedColor();
   if(!name||!goal)return toast('Name and goal are required','err');
+  const editing=!!myProfile;
+  const btnLabel=editing?'SAVE CHANGES':'START MY CHALLENGE';
   document.getElementById('ob-btn-text').innerHTML='<span class="spinner"></span>';
   const token=currentToken;
   const res=await fetch('/api/profiles',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({display_name:name,goal,approach,avatar_color:color,start_weight:weight})});
-  document.getElementById('ob-btn-text').textContent='START MY CHALLENGE';
+  document.getElementById('ob-btn-text').textContent=btnLabel;
   if(!res.ok){const e=await res.json();return toast(e.error,'err');}
-  toast('Profile saved! Welcome to the challenge 💪');
+  toast(editing?'Profile updated':'Profile saved! Welcome to the challenge 💪');
   await loadApp();
 }
 
@@ -466,7 +491,16 @@ async function loadApp(){
   if(!profRes.ok){showView('auth');return;}
   allProfiles=await profRes.json();
   myProfile=allProfiles.find(p=>p.user_id===currentUser.id);
-  if(!myProfile){buildColorPicker();showView('onboard');return;}
+  if(!myProfile){
+    document.getElementById('ob-name').value='';
+    document.getElementById('ob-goal').value='';
+    document.getElementById('ob-approach').value='';
+    document.getElementById('ob-weight').value='';
+    document.getElementById('ob-subtitle').textContent='Set up your profile to begin the challenge.';
+    document.getElementById('ob-btn-text').textContent='START MY CHALLENGE';
+    document.getElementById('ob-cancel').classList.add('hidden');
+    buildColorPicker();showView('onboard');return;
+  }
   const[wkRes,wtRes]=await Promise.all([
     fetch(`/api/workouts?user_id=${currentUser.id}`,{headers:{Authorization:`Bearer ${token}`}}),
     fetch(`/api/weights?user_id=${currentUser.id}`,{headers:{Authorization:`Bearer ${token}`}})
