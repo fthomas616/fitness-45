@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#1a1a2e"/>
   <title>45 Days | Fitness Challenge</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="45 Days"/>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%231a1a2e'/%3E%3Ctext x='90' y='95' font-family='Arial Black,Arial' font-size='52' font-weight='900' fill='%23fff' text-anchor='middle'%3E45%3C/text%3E%3Ctext x='90' y='135' font-family='Arial Black,Arial' font-size='22' font-weight='900' fill='%23e85d2f' text-anchor='middle'%3EDAYS%3C/text%3E%3C/svg%3E"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
@@ -168,6 +174,14 @@
     .day-dot.future{opacity:.45}
     .day-dot.penalty{outline:1px dashed rgba(214,48,48,.5);background:rgba(214,48,48,.08);border-color:rgba(214,48,48,.2);color:var(--danger)}
     .day-dot.penalty.logged{background:var(--accent3);border-color:var(--accent3);color:#fff;outline:1px dashed rgba(214,48,48,.5)}
+
+    /* ── iOS INSTALL HINT ── */
+    .ios-hint{position:fixed;left:1rem;right:1rem;bottom:1rem;background:var(--surface);
+      border:1.5px solid var(--border);border-radius:14px;padding:.85rem 1rem;
+      box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:60;display:flex;align-items:center;gap:.75rem;
+      font-family:'DM Sans',sans-serif;font-size:.85rem;line-height:1.4;max-width:480px;margin:0 auto}
+    .ios-hint b{color:var(--accent2)}
+    .ios-hint button{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:.25rem .5rem;line-height:1}
 
     /* ── ADMIN FAB ── */
     .admin-fab{position:fixed;left:1rem;bottom:1rem;width:42px;height:42px;border-radius:50%;
@@ -380,6 +394,10 @@
 </div>
 
 <div id="toast"></div>
+<div id="ios-hint" class="ios-hint hidden">
+  <div style="flex:1">📲 For best results, tap <b>Share → Add to Home Screen</b>. This keeps you signed in across sessions.</div>
+  <button onclick="dismissIosHint()" title="Dismiss">✕</button>
+</div>
 
 <script>
 // ── CHALLENGE CONFIG ── change START_DATE here (YYYY-MM-DD) and redeploy to shift Day 1 for everyone.
@@ -682,6 +700,14 @@ async function loadLeaderboard(){
     </div>`;}).join(''):'<div class="empty-msg">No data yet.</div>';
 }
 
+async function deleteInvite(id,email){
+  if(!confirm(`Revoke pending invite for ${email}?`))return;
+  const token=currentToken;
+  const res=await fetch(`/api/admin?invite_id=${encodeURIComponent(id)}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});
+  if(!res.ok)return toast('Failed to revoke invite','err');
+  toast('Invite revoked');loadAdmin();
+}
+
 async function loadAdmin(){
   const token=currentToken;
   const res=await fetch('/api/admin',{headers:{Authorization:`Bearer ${token}`}});
@@ -692,6 +718,7 @@ async function loadAdmin(){
       <div class="invite-email">${esc(inv.email)}</div>
       <div class="status-badge ${inv.status==='pending'?'badge-pending':'badge-active'}">${inv.status}</div>
       <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted)">${new Date(inv.created_at).toLocaleDateString()}</span>
+      ${inv.status==='pending'?`<button class="del-btn" title="Revoke invite" onclick="deleteInvite('${inv.id}','${esc(inv.email)}')">✕</button>`:''}
     </div>`).join(''):'<div class="empty-msg">No invites sent yet.</div>';
   document.getElementById('admin-members').innerHTML=users.length?users.map(u=>`
     <div class="invite-row">
@@ -752,6 +779,21 @@ function drawSparkline(canvasId,weights,startW,color){
 
 function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 window.addEventListener('resize',()=>{if(currentUser&&myProfile)renderDashboard();});
+
+function dismissIosHint(){
+  document.getElementById('ios-hint').classList.add('hidden');
+  try{localStorage.setItem('acc_ios_hint_dismissed','1');}catch(e){}
+}
+(function maybeShowIosHint(){
+  try{
+    const isIos=/iP(ad|hone|od)/.test(navigator.userAgent);
+    const isStandalone=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+    const dismissed=localStorage.getItem('acc_ios_hint_dismissed')==='1';
+    if(isIos&&!isStandalone&&!dismissed){
+      document.getElementById('ios-hint').classList.remove('hidden');
+    }
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
