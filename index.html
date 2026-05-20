@@ -450,7 +450,7 @@ function evaluatePenalties(workouts,currentDay){
 sb.auth.onAuthStateChange(async(event,session)=>{
   if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session?.user){
     currentUser=session.user;await loadApp();
-  }else if(event==='SIGNED_OUT'){showView('auth');}
+  }else{showView('auth');}
 });
 
 function showView(v){
