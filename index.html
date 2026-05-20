@@ -383,7 +383,7 @@ const AVATAR_COLORS = ['#1a1a2e','#3d5af1','#e85d2f','#1e8c5a','#7b3fa0','#c47c0
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let currentUser=null,myProfile=null,allProfiles=[],myWorkouts=[],myWeights=[];
+let currentUser=null,currentToken=null,myProfile=null,allProfiles=[],myWorkouts=[],myWeights=[];
 
 function toast(msg,type='ok',duration=3500){
   const el=document.createElement('div');
@@ -426,7 +426,7 @@ async function saveProfile(){
   const color=getSelectedColor();
   if(!name||!goal)return toast('Name and goal are required','err');
   document.getElementById('ob-btn-text').innerHTML='<span class="spinner"></span>';
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const res=await fetch('/api/profiles',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({display_name:name,goal,approach,avatar_color:color,start_weight:weight})});
   document.getElementById('ob-btn-text').textContent='START MY CHALLENGE';
   if(!res.ok){const e=await res.json();return toast(e.error,'err');}
@@ -447,10 +447,11 @@ function evaluatePenalties(workouts,currentDay){
   return{failedWeeks,penaltyDays:failedWeeks.length*PENALTY_DAYS};
 }
 
-sb.auth.onAuthStateChange(async(event,session)=>{
+sb.auth.onAuthStateChange((event,session)=>{
   if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session?.user){
-    currentUser=session.user;await loadApp();
-  }else{showView('auth');}
+    currentUser=session.user;currentToken=session.access_token;
+    setTimeout(()=>loadApp(),0);
+  }else{currentToken=null;showView('auth');}
 });
 
 function showView(v){
@@ -459,7 +460,7 @@ function showView(v){
 }
 
 async function loadApp(){
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const profRes=await fetch('/api/profiles',{headers:{Authorization:`Bearer ${token}`}});
   if(!profRes.ok){showView('auth');return;}
   allProfiles=await profRes.json();
@@ -542,7 +543,7 @@ async function logWeight(){
   const inp=document.getElementById('d-weight-input');
   const val=parseFloat(inp.value);
   if(!val||val<50||val>600){inp.style.borderColor='var(--danger)';setTimeout(()=>inp.style.borderColor='',600);return;}
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const res=await fetch('/api/weights',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({day:getCurrentDay(),value:val})});
   if(!res.ok)return toast('Failed to log weight','err');
   const entry=await res.json();
@@ -555,7 +556,7 @@ async function logWorkout(){
   const dInp=document.getElementById('d-dur-input');
   const text=wInp.value.trim(),dur=parseInt(dInp.value)||0;
   if(!text){wInp.style.borderColor='var(--danger)';setTimeout(()=>wInp.style.borderColor='',600);return;}
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const res=await fetch('/api/workouts',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({day:getCurrentDay(),description:text,duration_min:dur})});
   if(!res.ok)return toast('Failed to log workout','err');
   myWorkouts.unshift(await res.json());
@@ -563,14 +564,14 @@ async function logWorkout(){
 }
 
 async function deleteWorkout(id){
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const res=await fetch(`/api/workouts?id=${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});
   if(!res.ok)return toast('Failed to delete','err');
   myWorkouts=myWorkouts.filter(w=>w.id!==id);renderDashboard();
 }
 
 async function loadCommunity(){
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const[profRes,wkRes]=await Promise.all([
     fetch('/api/profiles',{headers:{Authorization:`Bearer ${token}`}}),
     fetch('/api/workouts',{headers:{Authorization:`Bearer ${token}`}})
@@ -603,7 +604,7 @@ async function loadCommunity(){
 }
 
 async function loadLeaderboard(){
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const[profRes,wkRes]=await Promise.all([
     fetch('/api/profiles',{headers:{Authorization:`Bearer ${token}`}}),
     fetch('/api/workouts',{headers:{Authorization:`Bearer ${token}`}})
@@ -635,7 +636,7 @@ async function loadLeaderboard(){
 }
 
 async function loadAdmin(){
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const res=await fetch('/api/admin',{headers:{Authorization:`Bearer ${token}`}});
   if(!res.ok)return toast('Admin load failed','err');
   const{invites,users}=await res.json();
@@ -656,7 +657,7 @@ async function loadAdmin(){
 async function sendInvite(){
   const email=document.getElementById('invite-email').value.trim();
   if(!email)return toast('Enter an email address','err');
-  const token=(await sb.auth.getSession()).data.session?.access_token;
+  const token=currentToken;
   const res=await fetch('/api/invite',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({email})});
   const data=await res.json();
   if(!res.ok)return toast(data.error||'Failed to send invite','err');
