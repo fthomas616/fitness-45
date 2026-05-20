@@ -162,11 +162,12 @@
 
     /* ── DAYS MAP ── */
     .days-map{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;margin-top:.75rem}
-    .day-dot{aspect-ratio:1;border-radius:3px;background:var(--surface2);border:1px solid var(--border)}
-    .day-dot.logged{background:var(--accent3);border-color:var(--accent3);opacity:.85}
+    .day-dot{aspect-ratio:1;border-radius:3px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);font-weight:600}
+    .day-dot.logged{background:var(--accent3);border-color:var(--accent3);color:#fff;opacity:1}
     .day-dot.today{box-shadow:0 0 0 2px var(--accent2)}
-    .day-dot.future{opacity:.3}
-    .day-dot.penalty{outline:1px dashed rgba(214,48,48,.5);background:rgba(214,48,48,.08);border-color:rgba(214,48,48,.2)}
+    .day-dot.future{opacity:.45}
+    .day-dot.penalty{outline:1px dashed rgba(214,48,48,.5);background:rgba(214,48,48,.08);border-color:rgba(214,48,48,.2);color:var(--danger)}
+    .day-dot.penalty.logged{background:var(--accent3);border-color:var(--accent3);color:#fff;outline:1px dashed rgba(214,48,48,.5)}
 
     /* ── LEADERBOARD ── */
     .lb-row{display:flex;align-items:center;gap:1rem;padding:.85rem 1rem;
@@ -534,7 +535,7 @@ function renderDashboard(){
     let cls='day-dot';
     if(d>45)cls+=' penalty';else if(d>day)cls+=' future';else if(loggedDays.has(d))cls+=' logged';
     if(d===day)cls+=' today';
-    mapHtml+=`<div class="${cls}" title="Day ${d}${d>45?' (penalty)':''}"></div>`;
+    mapHtml+=`<div class="${cls}" title="Day ${d}${d>45?' (penalty)':''}">${d}</div>`;
   }
   document.getElementById('d-days-map').innerHTML=mapHtml;
 }
