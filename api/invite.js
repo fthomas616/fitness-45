@@ -6,8 +6,9 @@ const APP_URL = process.env.APP_URL || 'https://your-app.vercel.app';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, inviterToken } = req.body;
+  const { email, pin } = req.body;
   if (!email) return res.status(400).json({ error: 'Email required' });
+  if (!pin || !/^\d{4}$/.test(String(pin))) return res.status(400).json({ error: 'A 4-digit PIN is required' });
 
   // Verify caller is admin via their Supabase token
   const authHeader = req.headers.authorization;
@@ -36,7 +37,7 @@ export default async function handler(req, res) {
   if (insertErr) return res.status(500).json({ error: 'Failed to record invite' });
 
   // Send magic link via Supabase auth (it emails the user)
-  const { error: otpErr } = await supabase.auth.admin.inviteUserByEmail(email, {
+  const { data: invitedData, error: otpErr } = await supabase.auth.admin.inviteUserByEmail(email, {
     redirectTo: `${APP_URL}/onboard`
   });
 
@@ -46,5 +47,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: otpErr.message });
   }
 
-  return res.status(200).json({ success: true, message: `Invite sent to ${email}` });
+  // Set the invitee's password to the padded PIN so they can pass the PIN gate
+  const newUserId = invitedData?.user?.id;
+  if (newUserId) {
+    const padded = `f45.${pin}.pwd`;
+    await supabase.auth.admin.updateUserById(newUserId, { password: padded });
+  }
+
+  return res.status(200).json({ success: true, message: `Invite sent to ${email}`, pin });
 }

@@ -257,6 +257,21 @@
   <button class="auth-gear" title="Admin sign-in" onclick="adminPinLogin()">⚙</button>
 </div>
 
+<!-- ══ INVITE PIN GATE ══ -->
+<div id="view-pin-gate" class="view" style="background:linear-gradient(160deg,var(--bg) 60%,#e8e4f8 100%);align-items:center;justify-content:center;padding:2rem">
+  <div class="auth-card" style="max-width:420px">
+    <div class="logo">45<span>DAYS</span></div>
+    <div class="tagline">One challenge. No excuses.</div>
+    <div class="auth-label" style="margin-top:1.5rem">Enter your invite PIN</div>
+    <input id="gate-pin" class="auth-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="• • • •" style="letter-spacing:.5rem;text-align:center"/>
+    <button class="btn btn-primary" onclick="verifyInvitePin()">
+      <span id="gate-btn-text">CONTINUE</span>
+    </button>
+    <p class="auth-note">The 4-digit PIN was shared with you separately by whoever invited you (text, phone call, in person). After this, you'll set up your profile.</p>
+    <button class="btn btn-secondary" style="margin-top:.5rem;width:100%" onclick="signOut()">SIGN OUT</button>
+  </div>
+</div>
+
 <!-- ══ ONBOARDING ══ -->
 <div id="view-onboard" class="view" style="background:linear-gradient(160deg,var(--bg) 60%,#e8e4f8 100%)">
   <div class="content" style="max-width:560px">
@@ -285,7 +300,7 @@
         <label>Profile Color</label>
         <div class="color-picker" id="color-picker"></div>
       </div>
-      <div class="field">
+      <div id="ob-pin-field" class="field">
         <label>4-Digit PIN <span id="ob-pin-hint" style="color:var(--muted);font-weight:300">(used to sign in without email)</span></label>
         <input id="ob-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="• • • •" style="letter-spacing:.5rem;text-align:center"/>
       </div>
@@ -391,9 +406,10 @@
       <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:1rem">Send Invite</div>
       <div class="input-row" style="margin-top:0">
         <input class="mini-input" id="invite-email" type="email" placeholder="friend@email.com" style="font-family:'DM Sans',sans-serif"/>
+        <input class="mini-input" id="invite-pin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4-digit PIN" style="font-family:'DM Sans',sans-serif;max-width:130px;letter-spacing:.3rem;text-align:center"/>
         <button class="btn-log" onclick="sendInvite()">SEND INVITE</button>
       </div>
-      <p style="color:var(--muted);font-size:.8rem;margin-top:.75rem;font-family:'Space Mono',monospace;line-height:1.7">They'll receive a branded email with a signup link. Once they create a profile, they appear in the Crew and Board.</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-top:.75rem;font-family:'Space Mono',monospace;line-height:1.7">They'll receive a magic-link email. Share the PIN with them via text or in person — they'll need to enter it after clicking the link to access the app.</p>
     </div>
     <div class="card" style="margin-top:1rem">
       <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:1rem">Invites Sent</div>
@@ -446,7 +462,7 @@ async function sendMagicLink(){
   document.getElementById('auth-sent').classList.remove('hidden');
 }
 
-async function signOut(){await sb.auth.signOut();location.reload();}
+async function signOut(){sessionStorage.removeItem('acc_pin_verified');await sb.auth.signOut();location.reload();}
 
 function toggleAuthMode(){
   const pinMode=!document.getElementById('auth-pin-wrap').classList.contains('hidden')?false:true;
@@ -455,6 +471,18 @@ function toggleAuthMode(){
   document.getElementById('auth-pin-btn').classList.toggle('hidden',!pinMode);
   document.getElementById('auth-toggle-text').textContent=pinMode?'USE MAGIC LINK INSTEAD':'USE 4-DIGIT PIN INSTEAD';
   document.getElementById('auth-note').textContent=pinMode?'Enter your email and the 4-digit PIN you set during signup.':'Enter the email your invite was sent to. We\'ll send a one-click login link — no password needed.';
+}
+
+async function verifyInvitePin(){
+  const pin=document.getElementById('gate-pin').value.trim();
+  if(!/^\d{4}$/.test(pin))return toast('Enter your 4-digit PIN','err');
+  document.getElementById('gate-btn-text').innerHTML='<span class="spinner"></span>';
+  const testClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON,{auth:{persistSession:false,autoRefreshToken:false}});
+  const{error}=await testClient.auth.signInWithPassword({email:currentUser.email,password:padPin(pin)});
+  document.getElementById('gate-btn-text').textContent='CONTINUE';
+  if(error)return toast('Incorrect PIN. Check with your inviter.','err');
+  sessionStorage.setItem('acc_pin_verified','1');
+  loadApp();
 }
 
 async function adminPinLogin(){
@@ -499,6 +527,7 @@ function openProfileEditor(){
   document.getElementById('ob-weight').value=myProfile.start_weight??'';
   document.getElementById('ob-pin').value='';
   document.getElementById('ob-pin-hint').textContent='(leave blank to keep current PIN)';
+  document.getElementById('ob-pin-field').classList.remove('hidden');
   buildColorPicker(myProfile.avatar_color);
   document.getElementById('ob-subtitle').textContent='Update your profile details.';
   document.getElementById('ob-btn-text').textContent='SAVE CHANGES';
@@ -524,7 +553,6 @@ async function saveProfile(){
   const pin=document.getElementById('ob-pin').value.trim();
   if(!name||!goal)return toast('Name and goal are required','err');
   const editing=!!myProfile;
-  if(!editing&&!/^\d{4}$/.test(pin))return toast('Please set a 4-digit PIN','err');
   if(pin&&!/^\d{4}$/.test(pin))return toast('PIN must be 4 digits','err');
   const btnLabel=editing?'SAVE CHANGES':'START MY CHALLENGE';
   document.getElementById('ob-btn-text').innerHTML='<span class="spinner"></span>';
@@ -573,12 +601,17 @@ async function loadApp(){
   allProfiles=await profRes.json();
   myProfile=allProfiles.find(p=>p.user_id===currentUser.id);
   if(!myProfile){
+    if(currentUser.email!==ADMIN_EMAIL&&!sessionStorage.getItem('acc_pin_verified')){
+      document.getElementById('gate-pin').value='';
+      showView('pin-gate');return;
+    }
     document.getElementById('ob-name').value='';
     document.getElementById('ob-goal').value='';
     document.getElementById('ob-approach').value='';
     document.getElementById('ob-weight').value='';
     document.getElementById('ob-pin').value='';
     document.getElementById('ob-pin-hint').textContent='(used to sign in without email)';
+    document.getElementById('ob-pin-field').classList.add('hidden');
     document.getElementById('ob-subtitle').textContent='Set up your profile to begin the challenge.';
     document.getElementById('ob-btn-text').textContent='START MY CHALLENGE';
     document.getElementById('ob-cancel').classList.add('hidden');
@@ -805,13 +838,17 @@ async function deleteMember(userId,email){
 
 async function sendInvite(){
   const email=document.getElementById('invite-email').value.trim();
+  const pin=document.getElementById('invite-pin').value.trim();
   if(!email)return toast('Enter an email address','err');
+  if(!/^\d{4}$/.test(pin))return toast('Enter a 4-digit PIN','err');
   const token=currentToken;
-  const res=await fetch('/api/invite',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({email})});
+  const res=await fetch('/api/invite',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({email,pin})});
   const data=await res.json();
   if(!res.ok)return toast(data.error||'Failed to send invite','err');
-  toast(`Invite sent to ${email} ✓`);
-  document.getElementById('invite-email').value='';loadAdmin();
+  alert(`Invite sent to ${email}\n\nShare this PIN with them (text/in person):  ${pin}\n\nThey'll need it after clicking the magic link.`);
+  document.getElementById('invite-email').value='';
+  document.getElementById('invite-pin').value='';
+  loadAdmin();
 }
 
 function openAdmin(navBtn){
