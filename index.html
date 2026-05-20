@@ -169,6 +169,13 @@
     .day-dot.penalty{outline:1px dashed rgba(214,48,48,.5);background:rgba(214,48,48,.08);border-color:rgba(214,48,48,.2);color:var(--danger)}
     .day-dot.penalty.logged{background:var(--accent3);border-color:var(--accent3);color:#fff;outline:1px dashed rgba(214,48,48,.5)}
 
+    /* ── ADMIN FAB ── */
+    .admin-fab{position:fixed;left:1rem;bottom:1rem;width:42px;height:42px;border-radius:50%;
+      background:var(--surface);border:1.5px solid var(--border);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+      box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:40;transition:transform .15s,background .15s}
+    .admin-fab:hover{transform:rotate(45deg);background:var(--surface2)}
+
     /* ── LEADERBOARD ── */
     .lb-row{display:flex;align-items:center;gap:1rem;padding:.85rem 1rem;
       background:var(--surface);border:1.5px solid var(--border);border-radius:12px;margin-bottom:.5rem;
@@ -369,6 +376,7 @@
       <div id="admin-members"><div class="empty-msg">Loading…</div></div>
     </div>
   </div>
+  <button id="admin-fab" class="admin-fab hidden" title="Admin" onclick="document.getElementById('nav-admin').click()">⚙️</button>
 </div>
 
 <div id="toast"></div>
@@ -507,7 +515,10 @@ async function loadApp(){
   ]);
   myWorkouts=wkRes.ok?await wkRes.json():[];
   myWeights=wtRes.ok?await wtRes.json():[];
-  if(currentUser.email===ADMIN_EMAIL)document.getElementById('nav-admin').classList.remove('hidden');
+  if(currentUser.email===ADMIN_EMAIL){
+    document.getElementById('nav-admin').classList.remove('hidden');
+    document.getElementById('admin-fab').classList.remove('hidden');
+  }
   const av=document.getElementById('nav-avatar');
   av.style.background=myProfile.avatar_color;
   av.style.color=isLight(myProfile.avatar_color)?'#1a1a2e':'#fff';
