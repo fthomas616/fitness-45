@@ -780,8 +780,19 @@ async function loadAdmin(){
       <div class="invite-email">${esc(u.email)}</div>
       <div class="status-badge badge-active">registered</div>
       <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted)">Last: ${u.last_sign_in?new Date(u.last_sign_in).toLocaleDateString():'never'}</span>
+      <button class="del-btn" title="Set or reset PIN" style="color:var(--accent2);font-size:.7rem;letter-spacing:1px" onclick="setMemberPin('${u.id}','${esc(u.email)}')">PIN</button>
       ${u.email===ADMIN_EMAIL?'':`<button class="del-btn" title="Wipe profile, workouts, weights" onclick="deleteMember('${u.id}','${esc(u.email)}')">✕</button>`}
     </div>`).join(''):'<div class="empty-msg">No members yet.</div>';
+}
+
+async function setMemberPin(userId,email){
+  const pin=prompt(`Set new 4-digit PIN for ${email}:`);
+  if(pin===null)return;
+  if(!/^\d{4}$/.test(pin)){toast('PIN must be 4 digits','err');return;}
+  const token=currentToken;
+  const res=await fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({user_id:userId,pin})});
+  if(!res.ok){const d=await res.json().catch(()=>({}));return toast(d.error||'Failed to set PIN','err');}
+  toast(`PIN set for ${email}`);
 }
 
 async function deleteMember(userId,email){

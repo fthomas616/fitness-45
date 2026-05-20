@@ -31,6 +31,17 @@ export default async function handler(req, res) {
     });
   }
 
+  // POST /api/admin — { user_id, pin } sets the user's password to the padded PIN
+  if (req.method === 'POST') {
+    const { user_id, pin } = req.body || {};
+    if (!user_id || !pin) return res.status(400).json({ error: 'user_id and pin required' });
+    if (!/^\d{4}$/.test(String(pin))) return res.status(400).json({ error: 'PIN must be 4 digits' });
+    const padded = `f45.${pin}.pwd`;
+    const { error } = await supabase.auth.admin.updateUserById(user_id, { password: padded });
+    if (error) return res.status(500).json({ error: error.message });
+    return res.status(200).json({ success: true });
+  }
+
   // DELETE /api/admin?invite_id=xxx — revoke invite
   // DELETE /api/admin?user_id=xxx — wipe member's profile, workouts, weights (auth user kept so they can re-login)
   if (req.method === 'DELETE') {
