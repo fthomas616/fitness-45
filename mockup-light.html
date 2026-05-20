@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>45 Days — Light Theme Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f5f4f0; --surface:#ffffff; --surface2:#efefeb;
+  --border:#e0deda; --accent:#1a1a2e; --accent2:#e85d2f;
+  --accent3:#3d5af1; --text:#1a1a2e; --muted:#8a8880;
+  --success:#1e8c5a; --danger:#d63030; --warn:#c47c00;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#dddbd5;font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh}
+
+/* outer wrapper */
+.outer{max-width:900px;margin:0 auto;padding:2rem 1rem}
+.page-header{text-align:center;margin-bottom:1.75rem}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:6px;color:var(--accent)}
+.page-title span{color:var(--accent2)}
+.page-sub{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent2);letter-spacing:5px;margin-top:.3rem}
+
+/* step nav */
+.step-nav{display:flex;justify-content:center;gap:.5rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.step-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;
+  padding:.45rem .95rem;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:1px;
+  color:var(--muted);cursor:pointer;transition:all .2s;text-transform:uppercase;box-shadow:var(--shadow)}
+.step-btn:hover{border-color:var(--accent3);color:var(--text)}
+.step-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.screen-desc{max-width:420px;margin:.25rem auto 1.5rem;text-align:center;
+  color:#777;font-size:.8rem;line-height:1.65;font-family:'Space Mono',monospace}
+
+/* phone */
+.phone{max-width:400px;margin:0 auto;background:var(--bg);border-radius:32px;
+  border:1.5px solid var(--border);overflow:hidden;
+  box-shadow:0 32px 64px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.5);
+  min-height:700px;position:relative}
+.screen{display:none;flex-direction:column;min-height:700px;animation:fadeIn .25s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* shared atoms */
+.logo-mark{font-family:'Bebas Neue',sans-serif;letter-spacing:5px;color:var(--accent)}
+.logo-mark span{color:var(--accent2)}
+.mono{font-family:'Space Mono',monospace}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;
+  padding:1.1rem;box-shadow:var(--shadow)}
+.label-xs{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:.55rem}
+.inp{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+  padding:.6rem .85rem;color:var(--text);font-size:.85rem;font-family:'DM Sans',sans-serif;
+  width:100%}
+.inp::placeholder{color:var(--muted)}
+.btn-dark{background:var(--accent);color:#fff;border:none;border-radius:12px;
+  padding:.85rem 1.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;
+  letter-spacing:3px;cursor:pointer;width:100%}
+.btn-sm-dark{background:var(--accent);color:#fff;border:none;border-radius:9px;
+  padding:.55rem .9rem;font-family:'Bebas Neue',sans-serif;font-size:.9rem;
+  letter-spacing:2px;cursor:pointer;white-space:nowrap}
+.row{display:flex;gap:.4rem;align-items:center}
+.badge{font-family:'Space Mono',monospace;font-size:.58rem;padding:.2rem .5rem;border-radius:5px}
+.badge-ok{background:rgba(30,140,90,.1);color:var(--success)}
+.badge-warn{background:rgba(196,124,0,.1);color:var(--warn)}
+.badge-danger{background:rgba(214,48,48,.1);color:var(--danger)}
+
+/* NAV BAR */
+.nav{display:flex;align-items:center;justify-content:space-between;
+  padding:.85rem 1.1rem;border-bottom:1.5px solid var(--border);
+  background:rgba(245,244,240,.95);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--accent)}
+.nav-logo span{color:var(--accent2)}
+.nav-tabs{display:flex;gap:.25rem}
+.ntab{background:none;border:1.5px solid transparent;border-radius:7px;
+  padding:.28rem .6rem;font-family:'Space Mono',monospace;font-size:.58rem;
+  color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .15s}
+.ntab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.nav-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:.68rem;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── SCREEN 1: Login ── */
+.s-login{align-items:center;justify-content:center;padding:2.5rem 1.75rem;
+  background:linear-gradient(160deg,var(--bg) 55%,#e8e4f8 100%)}
+.login-card{background:var(--surface);border:1.5px solid var(--border);border-radius:22px;
+  padding:2rem 1.75rem;width:100%;box-shadow:0 8px 32px rgba(61,90,241,.08);text-align:center}
+.logo-xl{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:3px;line-height:1;color:var(--accent)}
+.logo-xl span{color:var(--accent2)}
+.tagline{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;margin:.4rem 0 1.75rem}
+.field-lbl{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;
+  color:var(--muted);text-align:left;margin-bottom:.4rem;text-transform:uppercase}
+.auth-inp{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;
+  margin-bottom:.9rem}
+.auth-inp::placeholder{color:var(--muted)}
+.auth-note{color:var(--muted);font-size:.75rem;text-align:center;margin-top:.9rem;line-height:1.7}
+.rules-box{background:var(--surface2);border:1.5px solid var(--border);border-left:3px solid var(--accent2);
+  border-radius:12px;padding:.9rem;margin-top:1.25rem;text-align:left}
+.rules-title{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;
+  color:var(--accent2);text-transform:uppercase;margin-bottom:.5rem}
+.rule{font-size:.78rem;color:var(--muted);padding:.2rem 0;display:flex;gap:.55rem;line-height:1.5}
+.rule::before{content:'›';color:var(--accent2);flex-shrink:0}
+
+/* ── SCREEN 2: Onboard ── */
+.s-onboard{padding:1.5rem;background:linear-gradient(160deg,var(--bg) 60%,#e8e4f8 100%)}
+.ob-top{text-align:center;margin-bottom:1.25rem}
+.ob-logo{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:5px;color:var(--accent)}
+.ob-logo span{color:var(--accent2)}
+.ob-sub{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:.25rem}
+.form-card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:1.1rem;box-shadow:var(--shadow)}
+.fw{margin-bottom:.85rem}
+.fl{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:.35rem}
+.fi{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;
+  padding:.6rem .85rem;color:var(--text);font-size:.85rem;font-family:'DM Sans',sans-serif}
+.fi-ta{min-height:58px;resize:none}
+.swatches{display:flex;gap:.5rem;margin-top:.3rem}
+.sw{width:24px;height:24px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .12s}
+.sw.sel{border-color:var(--accent);transform:scale(1.2)}
+.btn-go{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;
+  padding:.85rem;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;
+  cursor:pointer;margin-top:.65rem}
+
+/* ── SCREEN 3: Dashboard ── */
+.dash-body{padding:.85rem;display:flex;flex-direction:column;gap:.7rem;flex:1;overflow-y:auto}
+.challenge-card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:1.1rem;box-shadow:var(--shadow)}
+.cc-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.5rem}
+.cc-day{font-family:'Bebas Neue',sans-serif;font-size:3rem;line-height:1;color:var(--accent)}
+.cc-of{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--muted)}
+.bar-tr{width:100%;height:7px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:.5rem 0 .25rem}
+.bar-fl{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent3),var(--accent))}
+.pct-txt{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted)}
+.wk-ok{background:rgba(30,140,90,.07);border:1.5px solid rgba(30,140,90,.25);color:var(--success);
+  border-radius:9px;padding:.55rem .85rem;font-family:'Space Mono',monospace;font-size:.65rem;
+  line-height:1.5;margin-top:.4rem}
+.wk-warn{background:rgba(196,124,0,.06);border:1.5px solid rgba(196,124,0,.25);color:var(--warn);
+  border-radius:9px;padding:.55rem .85rem;font-family:'Space Mono',monospace;font-size:.65rem;
+  line-height:1.5;margin-top:.4rem}
+.wt-card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:1.1rem;box-shadow:var(--shadow)}
+.wt-row{display:flex;align-items:baseline;gap:.5rem}
+.wt-big{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;line-height:1;color:var(--accent)}
+.wt-unit{color:var(--muted);font-size:.85rem}
+.wt-delta{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--success);
+  background:rgba(30,140,90,.08);border:1px solid rgba(30,140,90,.2);border-radius:5px;padding:.14rem .38rem}
+.spark{width:100%;height:38px;margin:.5rem 0;
+  background:linear-gradient(to right,rgba(61,90,241,.04),rgba(61,90,241,.1));
+  border-radius:6px;position:relative;overflow:hidden;border:1px solid rgba(61,90,241,.1)}
+.spark::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent3),transparent)}
+.log-row{display:flex;gap:.4rem;margin-top:.5rem}
+.log-inp{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;
+  padding:.55rem .7rem;color:var(--text);font-size:.8rem;font-family:'DM Sans',sans-serif}
+.log-inp::placeholder{color:var(--muted)}
+.wo-list{margin-top:.6rem;display:flex;flex-direction:column;gap:.3rem}
+.wo-row{display:flex;align-items:center;gap:.55rem;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:.48rem .65rem;font-size:.78rem}
+.wo-d{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);white-space:nowrap}
+.wo-t{flex:1}
+.wo-dur{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--accent3)}
+.map-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:2.5px;margin-top:.55rem}
+.dot{aspect-ratio:1;border-radius:2px;background:var(--surface2);border:1px solid var(--border)}
+.dot.on{background:var(--accent3);border-color:var(--accent3);opacity:.8}
+.dot.now{box-shadow:0 0 0 2px var(--accent2)}
+.dot.dim{opacity:.28}
+
+/* ── SCREEN 4: Crew ── */
+.crew-body{padding:.85rem;display:flex;flex-direction:column;gap:.65rem;flex:1;overflow-y:auto}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--muted)}
+.pc{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:1.1rem;
+  display:flex;flex-direction:column;gap:.75rem;box-shadow:var(--shadow)}
+.pc-top{display:flex;align-items:center;gap:.85rem}
+.pc-av{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;flex-shrink:0}
+.pc-name{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:2px}
+.pc-handle{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted)}
+.pc-lbl{font-family:'Space Mono',monospace;font-size:.56rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:.28rem}
+.pc-body{font-size:.8rem;color:var(--text);line-height:1.6}
+.pc-stats{display:flex;gap:1.1rem}
+.ps{display:flex;flex-direction:column;gap:.1rem}
+.ps-n{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;line-height:1}
+.ps-l{font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted);text-transform:uppercase}
+
+/* ── SCREEN 5: Leaderboard ── */
+.board-body{padding:.85rem;flex:1}
+.lb{display:flex;align-items:center;gap:.8rem;padding:.7rem .85rem;
+  background:var(--surface);border:1.5px solid var(--border);border-radius:12px;
+  margin-bottom:.45rem;box-shadow:var(--shadow)}
+.lbr{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;width:1.7rem;text-align:center;flex-shrink:0}
+.gold{color:#b8860b}.silver{color:#888}.bronze{color:#a0522d}
+.lb-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
+.lb-info{flex:1}
+.lb-nm{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:1px}
+.lb-sb{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted)}
+.lb-right{text-align:right}
+.lb-days{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;line-height:1}
+.lb-pen{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--danger)}
+.score-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
+  padding:.9rem;margin-top:1rem;box-shadow:var(--shadow)}
+
+/* ── SCREEN 6: Admin ── */
+.admin-body{padding:.85rem;display:flex;flex-direction:column;gap:.7rem;flex:1}
+.stat-row{display:flex;gap:.6rem}
+.stat-box{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
+  padding:.8rem;flex:1;text-align:center;box-shadow:var(--shadow)}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1}
+.stat-l{font-family:'Space Mono',monospace;font-size:.55rem;color:var(--muted);text-transform:uppercase;margin-top:.15rem}
+.inv-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:.35rem}
+.inv-em{font-family:'Space Mono',monospace;font-size:.65rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-note{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.7;margin-top:.6rem}
+/* ── SCREEN 7: Start Dates ── */
+.dates-body{padding:.85rem;display:flex;flex-direction:column;gap:.75rem;flex:1;overflow-y:auto}
+.sec-title-sm{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;color:var(--muted);margin-bottom:.35rem}
+.date-card{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:1.1rem;box-shadow:var(--shadow)}
+.date-card-group{border-color:rgba(232,93,47,.25);background:#fffcfb}
+.date-current-row{display:flex;gap:1.5rem}
+.date-lbl{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.date-val{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;color:var(--accent);margin-top:.15rem}
+.date-inp{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+  padding:.6rem .85rem;color:var(--text);font-family:'Space Mono',monospace;font-size:.82rem;
+  outline:none;transition:border-color .2s;margin-bottom:.75rem}
+.date-inp:focus{border-color:var(--accent3)}
+.date-inp::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer}
+.date-action-row{display:flex;gap:.5rem}
+.date-btn-go{flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:.65rem 1rem;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px;cursor:pointer;transition:all .15s}
+.date-btn-go:hover{background:#2d2d50}
+.date-btn-orange{background:var(--accent2)!important}
+.date-btn-orange:hover{background:#c94a20!important}
+.date-note{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:.65rem;line-height:1.6}
+.date-divider{height:1px;background:var(--border);margin:.25rem 0}
+.group-icon{font-size:1.75rem;margin-bottom:.4rem}
+.group-headline{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--accent2);margin-bottom:.3rem}
+.group-sub{font-size:.8rem;color:var(--muted);line-height:1.55;margin-bottom:.1rem}
+
+/* ── MODALS ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(26,26,46,.45);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:100;
+  animation:fadeIn .2s ease}
+.modal-overlay.hidden{display:none}
+.modal-box{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;
+  padding:1.5rem;width:100%;box-shadow:0 16px 48px rgba(0,0,0,.15)}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;margin-bottom:.4rem}
+.modal-sub{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.modal-opt{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;
+  padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem;cursor:pointer;
+  text-align:left;margin-bottom:.5rem;transition:border-color .2s}
+.modal-opt:hover{border-color:var(--accent3)}
+.modal-opt-danger{border-color:rgba(214,48,48,.2);background:#fff9f9}
+.modal-opt-danger:hover{border-color:var(--danger)}
+.modal-opt-icon{font-size:1.4rem;flex-shrink:0}
+.modal-opt-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1px;color:var(--text)}
+.modal-opt-desc{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:.1rem;line-height:1.4}
+.modal-cancel{width:100%;background:none;border:1.5px solid var(--border);border-radius:10px;
+  padding:.65rem;font-family:'Space Mono',monospace;font-size:.7rem;color:var(--muted);
+  cursor:pointer;margin-top:.25rem;transition:border-color .2s}
+.modal-cancel:hover{border-color:var(--accent)}
+.confirm-icon{font-size:2rem;text-align:center;margin-bottom:.5rem}
+/* ── NUDGE / NOTIFICATIONS ── */
+.nav-bell{position:relative;width:26px;height:26px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;flex-shrink:0;font-size:1rem}
+.bell-dot{position:absolute;top:0;right:0;width:8px;height:8px;background:var(--accent2);
+  border-radius:50%;border:1.5px solid var(--bg)}
+.nudge-screen{flex:1;display:flex;flex-direction:column}
+.nudge-feed{padding:.85rem;display:flex;flex-direction:column;gap:.6rem;flex:1;overflow-y:auto}
+.nudge-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
+  padding:.9rem 1rem;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:.4rem}
+.nudge-card.unread{border-left:3px solid var(--accent2);background:#fffcfb}
+.nudge-top{display:flex;align-items:center;gap:.65rem}
+.nudge-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
+.nudge-who{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px}
+.nudge-meta{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+.nudge-workout{font-size:.8rem;color:var(--muted);padding:.3rem .6rem;background:var(--bg);
+  border-radius:6px;border:1px solid var(--border);font-family:'Space Mono',monospace;font-size:.68rem}
+.nudge-taunt{font-size:.88rem;color:var(--text);font-style:italic;padding:.3rem 0 0 .1rem}
+.taunt-field{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;
+  padding:.55rem .75rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;
+  margin-top:.4rem;font-style:italic}
+.taunt-field::placeholder{color:var(--muted)}
+.taunt-hint{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);
+  margin-top:.3rem;line-height:1.5}
+/* group member chips on onboard */
+.group-chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
+.g-chip{display:flex;align-items:center;gap:.4rem;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:99px;padding:.25rem .65rem .25rem .35rem;font-size:.78rem}
+.g-chip-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:.58rem;font-weight:700;color:#fff;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <div class="page-header">
+    <div class="page-title">45<span>DAYS</span></div>
+    <div class="page-sub">ARE YOU UP FOR THIS</div>
+  </div>
+
+  <div class="step-nav">
+    <button class="step-btn active" onclick="go('login',this)">① Login</button>
+    <button class="step-btn" onclick="go('onboard',this)">② Profile Setup</button>
+    <button class="step-btn" onclick="go('dashboard',this)">③ Dashboard</button>
+    <button class="step-btn" onclick="go('crew',this)">④ The Crew</button>
+    <button class="step-btn" onclick="go('board',this)">⑤ Leaderboard</button>
+    <button class="step-btn" onclick="go('admin',this)">⑥ Admin</button>
+    <button class="step-btn" onclick="go('request',this)">⑦ Request Group</button>
+    <button class="step-btn" onclick="go('approvals',this)">⑧ Approve Groups</button>
+  </div>
+
+  <div id="desc" class="screen-desc">First screen anyone sees — clean white card on a warm off-white background. Enter your invited email, receive a magic link. No password ever.</div>
+
+  <div class="phone">
+
+    <!-- ① LOGIN -->
+    <div id="s-login" class="screen s-login active">
+      <div class="login-card">
+        <div class="logo-xl">45<span>DAYS</span></div>
+        <div class="tagline">People up for the challenge · No excuses</div>
+        <div class="field-lbl">Your email address</div>
+        <input class="auth-inp" type="email" placeholder="you@example.com" readonly/>
+        <button class="btn-dark" onclick="go('onboard',document.querySelectorAll('.step-btn')[1])">SEND MAGIC LINK</button>
+        <p class="auth-note">Enter the email your invite was sent to. We'll send a one-click login — no password needed.</p>
+        <div style="text-align:center;margin-top:1.25rem;padding-top:1.25rem;border-top:1.5px solid var(--border)">
+          <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:1px">Want to run your own challenge?</div>
+          <button class="btn-dark" style="background:transparent;border:1.5px solid var(--border);color:var(--accent);font-size:1rem;padding:.7rem" onclick="go('request',document.querySelectorAll('.step-btn')[6])">REQUEST A GROUP</button>
+        </div>
+        <div class="rules-box">
+          <div class="rules-title">Challenge Rules</div>
+          <div class="rule">Minimum 3 workouts per 7-day week</div>
+          <div class="rule">Miss a week → +5 days added to your total</div>
+          <div class="rule">Log weight &amp; workouts to track progress</div>
+          <div class="rule">Everyone sees everyone's goals &amp; progress</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② ONBOARD -->
+    <div id="s-onboard" class="screen s-onboard">
+      <div class="ob-top">
+        <div class="ob-logo">45<span>DAYS</span></div>
+        <div class="ob-sub">Set up your profile to begin</div>
+      </div>
+      <div class="form-card">
+        <div class="fw"><div class="fl">Display Name</div><input class="fi" value="Alex" readonly/></div>
+        <div class="fw">
+          <div class="fl">Your Goal</div>
+          <textarea class="fi fi-ta" readonly>Lose 15 lbs and build core strength before summer</textarea>
+        </div>
+        <div class="fw">
+          <div class="fl">Your Approach</div>
+          <textarea class="fi fi-ta" readonly style="min-height:46px">3x strength + 2x cardio. Cutting processed carbs.</textarea>
+        </div>
+        <div class="fw"><div class="fl">Starting Weight (lbs)</div><input class="fi" value="197.5" readonly/></div>
+        <div class="fw">
+          <div class="fl">Profile Color</div>
+          <div class="swatches">
+            <div class="sw sel" style="background:#1a1a2e"></div>
+            <div class="sw" style="background:#3d5af1"></div>
+            <div class="sw" style="background:#e85d2f"></div>
+            <div class="sw" style="background:#1e8c5a"></div>
+            <div class="sw" style="background:#7b3fa0"></div>
+            <div class="sw" style="background:#c47c00"></div>
+          </div>
+        </div>
+
+        <div class="fw">
+          <div class="fl">Your Challenge Group</div>
+          <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.5rem;line-height:1.5">These are the people you're up against. Their workouts will nudge you.</div>
+          <div class="group-chips">
+            <div class="g-chip">
+              <div class="g-chip-av" style="background:#e85d2f">JO</div>
+              <span>Jordan</span>
+            </div>
+            <div class="g-chip">
+              <div class="g-chip-av" style="background:#1e8c5a">SA</div>
+              <span>Sam</span>
+            </div>
+            <div class="g-chip" style="border-style:dashed;color:var(--muted)">
+              + waiting for more…
+            </div>
+          </div>
+        </div>
+        <button class="btn-go" onclick="go('dashboard',document.querySelectorAll('.step-btn')[2])">START MY CHALLENGE</button>
+      </div>
+    </div>
+
+    <!-- ③ DASHBOARD -->
+    <div id="s-dashboard" class="screen">
+      <div class="nav">
+        <div class="nav-logo">45<span>DAYS</span></div>
+        <div class="nav-tabs">
+          <div class="ntab on">Dash</div>
+          <div class="ntab" onclick="go('crew',document.querySelectorAll('.step-btn')[3])">Crew</div>
+          <div class="ntab" onclick="go('board',document.querySelectorAll('.step-btn')[4])">Board</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <div class="nav-bell" onclick="go('nudges',null)" title="Nudges">
+            🔔<div class="bell-dot"></div>
+          </div>
+          <div class="nav-av" style="background:#1a1a2e">A</div>
+        </div>
+      </div>
+      <div class="dash-body">
+
+        <div class="challenge-card">
+          <div class="label-xs">Your Challenge</div>
+          <div class="cc-top">
+            <div><div class="cc-day">12</div><div class="mono muted" style="font-size:.58rem;text-transform:uppercase;letter-spacing:1px">Current Day</div></div>
+            <div style="text-align:right"><div class="cc-of">45</div><div class="mono muted" style="font-size:.58rem;text-transform:uppercase;letter-spacing:1px">Total Days</div></div>
+          </div>
+          <div class="bar-tr"><div class="bar-fl" style="width:27%"></div></div>
+          <div class="pct-txt">27% complete</div>
+          <div class="wk-ok">✓ Week 2: 3/3 workouts — you're clear!</div>
+        </div>
+
+        <div class="wt-card">
+          <div class="label-xs">Weight</div>
+          <div class="wt-row">
+            <div class="wt-big">193.5</div>
+            <div class="wt-unit">lbs</div>
+            <div class="wt-delta">↓ 4.0 lbs</div>
+          </div>
+          <div class="spark"></div>
+          <div class="log-row">
+            <input class="log-inp" placeholder="Log today's weight…" readonly/>
+            <button class="btn-sm-dark">LOG</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label-xs">Workout Log</div>
+          <div class="log-row" style="margin-top:0">
+            <input class="log-inp" placeholder="What did you do today?" readonly/>
+            <input class="log-inp" placeholder="min" style="max-width:50px" readonly/>
+            <button class="btn-sm-dark">+</button>
+          </div>
+          <input class="taunt-field" placeholder="Send the crew a shoutout… (optional) 💪" readonly/>
+          <div class="taunt-hint">Fires a motivational nudge to everyone when you log. Leave blank to skip.</div>
+          <div class="wo-list">
+            <div class="wo-row"><span class="wo-d">D12</span><span class="wo-t">Upper body push + planks</span><span class="wo-dur">45m</span></div>
+            <div class="wo-row"><span class="wo-d">D11</span><span class="wo-t">4 mile run — felt strong</span><span class="wo-dur">38m</span></div>
+            <div class="wo-row"><span class="wo-d">D9</span><span class="wo-t">Legs: squats, lunges, RDL</span><span class="wo-dur">52m</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label-xs">45-Day Map</div>
+          <div class="map-grid" id="map"></div>
+          <div style="display:flex;gap:1rem;margin-top:.55rem;font-size:.65rem;color:var(--muted);font-family:'Space Mono',monospace;flex-wrap:wrap">
+            <span><span style="color:var(--accent3)">■</span> Logged</span>
+            <span><span style="color:var(--accent2)">□</span> Today</span>
+            <span><span style="color:var(--surface2)">■</span> Upcoming</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ④ CREW -->
+    <div id="s-crew" class="screen">
+      <div class="nav">
+        <div class="nav-logo">45<span>DAYS</span></div>
+        <div class="nav-tabs">
+          <div class="ntab" onclick="go('dashboard',document.querySelectorAll('.step-btn')[2])">Dash</div>
+          <div class="ntab on">Crew</div>
+          <div class="ntab" onclick="go('board',document.querySelectorAll('.step-btn')[4])">Board</div>
+        </div>
+        <div class="nav-av" style="background:#1a1a2e">A</div>
+      </div>
+      <div class="crew-body">
+        <div class="sec-title">THE CREW</div>
+
+        <div class="pc" style="border-top:3px solid #1a1a2e">
+          <div class="pc-top">
+            <div class="pc-av" style="background:#1a1a2e">AL</div>
+            <div>
+              <div class="pc-name">ALEX</div>
+              <div class="pc-handle">(you) · Day 12 of 45</div>
+            </div>
+          </div>
+          <div><div class="pc-lbl">Goal</div><div class="pc-body">Lose 15 lbs and build core strength before summer</div></div>
+          <div><div class="pc-lbl">Approach</div><div class="pc-body">3x strength + 2x cardio. Cutting processed carbs.</div></div>
+          <div class="pc-stats">
+            <div class="ps"><div class="ps-n" style="color:#1a1a2e">7</div><div class="ps-l">Workouts</div></div>
+            <div class="ps"><div class="ps-n" style="color:var(--accent3)">45</div><div class="ps-l">Total Days</div></div>
+            <div class="ps"><div class="ps-n" style="color:var(--success)">4.0</div><div class="ps-l">Lbs Lost</div></div>
+          </div>
+        </div>
+
+        <div class="pc" style="border-top:3px solid #e85d2f">
+          <div class="pc-top">
+            <div class="pc-av" style="background:#e85d2f">JO</div>
+            <div>
+              <div class="pc-name">JORDAN</div>
+              <div class="pc-handle">Day 12 of 50</div>
+            </div>
+            <div style="margin-left:auto;font-family:'Space Mono',monospace;font-size:.6rem;
+              color:var(--danger);background:rgba(214,48,48,.08);border:1.5px solid rgba(214,48,48,.2);
+              border-radius:6px;padding:.22rem .5rem">+5d</div>
+          </div>
+          <div><div class="pc-lbl">Goal</div><div class="pc-body">Get back to 180 lbs. Build a sustainable routine I can actually stick to.</div></div>
+          <div><div class="pc-lbl">Approach</div><div class="pc-body">Daily walks + 3 gym sessions. Meal prepping Sundays.</div></div>
+          <div class="pc-stats">
+            <div class="ps"><div class="ps-n" style="color:#e85d2f">5</div><div class="ps-l">Workouts</div></div>
+            <div class="ps"><div class="ps-n" style="color:var(--danger)">50</div><div class="ps-l">Total Days</div></div>
+            <div class="ps"><div class="ps-n" style="color:var(--success)">2.5</div><div class="ps-l">Lbs Lost</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ LEADERBOARD -->
+    <div id="s-board" class="screen">
+      <div class="nav">
+        <div class="nav-logo">45<span>DAYS</span></div>
+        <div class="nav-tabs">
+          <div class="ntab" onclick="go('dashboard',document.querySelectorAll('.step-btn')[2])">Dash</div>
+          <div class="ntab" onclick="go('crew',document.querySelectorAll('.step-btn')[3])">Crew</div>
+          <div class="ntab on">Board</div>
+        </div>
+        <div class="nav-av" style="background:#1a1a2e">A</div>
+      </div>
+      <div class="board-body">
+        <div class="sec-title" style="margin-bottom:.8rem">LEADERBOARD</div>
+
+        <div class="lb" style="border-color:rgba(184,134,11,.3)">
+          <div class="lbr gold">1</div>
+          <div class="lb-av" style="background:#1a1a2e">A</div>
+          <div class="lb-info">
+            <div class="lb-nm">ALEX <span style="color:var(--muted);font-size:.65rem">(you)</span></div>
+            <div class="lb-sb">7 workouts · 0 missed weeks</div>
+          </div>
+          <div class="lb-right">
+            <div class="lb-days" style="color:var(--accent)">45d</div>
+          </div>
+        </div>
+
+        <div class="lb">
+          <div class="lbr silver">2</div>
+          <div class="lb-av" style="background:#e85d2f">J</div>
+          <div class="lb-info">
+            <div class="lb-nm">JORDAN</div>
+            <div class="lb-sb">5 workouts · 1 missed week</div>
+          </div>
+          <div class="lb-right">
+            <div class="lb-days" style="color:var(--danger)">50d</div>
+            <div class="lb-pen">+5 day penalty</div>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="label-xs" style="margin-bottom:.6rem">Score Formula</div>
+          <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted);line-height:2">
+            <div>Workouts logged → +10 pts each</div>
+            <div>Missed week → −5 pts penalty</div>
+            <div>Challenge total → 45 + penalty days</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ ADMIN -->
+    <div id="s-admin" class="screen">
+      <div class="nav">
+        <div class="nav-logo">45<span>DAYS</span></div>
+        <div class="nav-tabs">
+          <div class="ntab" onclick="go('dashboard',document.querySelectorAll('.step-btn')[2])">Dash</div>
+          <div class="ntab" onclick="go('crew',document.querySelectorAll('.step-btn')[3])">Crew</div>
+          <div class="ntab" onclick="go('board',document.querySelectorAll('.step-btn')[4])">Board</div>
+          <div class="ntab on" style="background:var(--accent2);border-color:var(--accent2)">Admin</div>
+        </div>
+        <div class="nav-av" style="background:var(--accent2)">A</div>
+      </div>
+      <div class="admin-body">
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-n" style="color:var(--accent)">2</div><div class="stat-l">Members</div></div>
+          <div class="stat-box"><div class="stat-n" style="color:var(--warn)">1</div><div class="stat-l">Pending</div></div>
+          <div class="stat-box"><div class="stat-n" style="color:var(--success)">12</div><div class="stat-l">Day</div></div>
+        </div>
+
+        <div class="card">
+          <div class="label-xs">Send Invite</div>
+          <div class="log-row" style="margin-top:.35rem">
+            <input class="log-inp" placeholder="friend@email.com" readonly style="background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:.55rem .7rem;color:var(--text);font-size:.8rem;font-family:'DM Sans',sans-serif;flex:1"/>
+            <button class="btn-sm-dark">SEND</button>
+          </div>
+          <div class="admin-note">They'll get a branded email + signup link.<br>Once they create a profile, they appear in Crew + Board.</div>
+        </div>
+
+        <div class="card">
+          <div class="label-xs" style="margin-bottom:.6rem">Invites Sent</div>
+          <div class="inv-item">
+            <div class="inv-em">jordan@example.com</div>
+            <div class="badge badge-ok">active</div>
+            <span style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted)">Jun 1</span>
+          </div>
+          <div class="inv-item">
+            <div class="inv-em">sam@example.com</div>
+            <div class="badge badge-warn">pending</div>
+            <span style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted)">Jun 3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑦ START DATES -->
+    <div id="s-dates" class="screen">
+      <div class="nav">
+        <div class="nav-logo">45<span>DAYS</span></div>
+        <div class="nav-tabs">
+          <div class="ntab" onclick="go('dashboard',document.querySelectorAll('.step-btn')[2])">Dash</div>
+          <div class="ntab" onclick="go('crew',document.querySelectorAll('.step-btn')[3])">Crew</div>
+          <div class="ntab" onclick="go('board',document.querySelectorAll('.step-btn')[4])">Board</div>
+          <div class="ntab on" style="background:var(--accent3);border-color:var(--accent3)">Date</div>
+        </div>
+        <div class="nav-av" style="background:#1a1a2e">A</div>
+      </div>
+
+      <div class="dates-body">
+
+        <!-- Individual reset -->
+        <div class="sec-title-sm">MY START DATE</div>
+        <div class="date-card">
+          <div class="date-current-row">
+            <div>
+              <div class="date-lbl">Current start</div>
+              <div class="date-val">June 1, 2025</div>
+            </div>
+            <div>
+              <div class="date-lbl">Day</div>
+              <div class="date-val" style="color:var(--accent3)">12 of 45</div>
+            </div>
+          </div>
+          <div class="date-lbl" style="margin-bottom:.35rem;margin-top:.85rem">Set a new personal start date</div>
+          <input class="date-inp" type="date" value="2025-06-15"/>
+          <div class="date-action-row">
+            <button class="date-btn-go" onclick="showModal('individual')">CHANGE MY DATE</button>
+          </div>
+          <div class="date-note">Only your clock resets. Everyone else stays on their timeline.</div>
+        </div>
+
+        <div class="date-divider"></div>
+
+        <!-- Group reset -->
+        <div class="sec-title-sm">GROUP RESET</div>
+        <div class="date-card date-card-group">
+          <div class="group-icon">👥</div>
+          <div class="group-headline">Reset the challenge for everyone</div>
+          <div class="group-sub">Pick a new date and all members restart together. Anyone can do this.</div>
+          <div class="date-lbl" style="margin-bottom:.35rem;margin-top:.85rem">New group start date</div>
+          <input class="date-inp" type="date" value="2025-07-01"/>
+          <div class="date-action-row">
+            <button class="date-btn-go date-btn-orange" onclick="showModal('group')">RESET GROUP DATE</button>
+          </div>
+          <div class="date-note" style="color:var(--warn)">⚠ This affects all members immediately.</div>
+        </div>
+
+      </div><!-- /dates-body -->
+
+      <!-- ── MODAL: Individual ── -->
+      <div id="modal-individual" class="modal-overlay hidden" onclick="hideModals()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+          <div class="modal-title">Change Your Start Date</div>
+          <div class="modal-sub">Your clock moves to <strong>June 15, 2025</strong>. What should happen to your existing logs?</div>
+          <button class="modal-opt" onclick="hideModals();showConfirm('individual','keep')">
+            <div class="modal-opt-icon">📂</div>
+            <div>
+              <div class="modal-opt-title">Keep my logs</div>
+              <div class="modal-opt-desc">History stays, penalties recalculate from new date</div>
+            </div>
+          </button>
+          <button class="modal-opt modal-opt-danger" onclick="hideModals();showConfirm('individual','clear')">
+            <div class="modal-opt-icon">🗑</div>
+            <div>
+              <div class="modal-opt-title">Clear everything</div>
+              <div class="modal-opt-desc">Wipe workouts, weights and start completely fresh</div>
+            </div>
+          </button>
+          <button class="modal-cancel" onclick="hideModals()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- ── MODAL: Group ── -->
+      <div id="modal-group" class="modal-overlay hidden" onclick="hideModals()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+          <div class="modal-title">Reset Group Start Date</div>
+          <div class="modal-sub">Everyone restarts on <strong>July 1, 2025</strong>. What happens to all members' logs?</div>
+          <button class="modal-opt" onclick="hideModals();showConfirm('group','keep')">
+            <div class="modal-opt-icon">📂</div>
+            <div>
+              <div class="modal-opt-title">Keep all logs</div>
+              <div class="modal-opt-desc">History stays for everyone, clocks reset to new date</div>
+            </div>
+          </button>
+          <button class="modal-opt modal-opt-danger" onclick="hideModals();showConfirm('group','clear')">
+            <div class="modal-opt-icon">🗑</div>
+            <div>
+              <div class="modal-opt-title">Full wipe for everyone</div>
+              <div class="modal-opt-desc">All workouts and weights cleared — clean slate</div>
+            </div>
+          </button>
+          <button class="modal-cancel" onclick="hideModals()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- ── CONFIRM ── -->
+      <div id="modal-confirm" class="modal-overlay hidden" onclick="hideModals()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+          <div class="confirm-icon" id="confirm-icon">✓</div>
+          <div class="modal-title" id="confirm-title">Are you sure?</div>
+          <div class="modal-sub" id="confirm-sub">This action cannot be undone.</div>
+          <div style="display:flex;gap:.6rem;margin-top:1rem">
+            <button class="modal-cancel" style="flex:1" onclick="hideModals()">Cancel</button>
+            <button class="date-btn-go" style="flex:1;border-radius:10px;font-size:.9rem;padding:.7rem" onclick="hideModals()">CONFIRM</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /s-dates -->
+
+    <!-- ⑦ NUDGE FEED -->
+    <div id="s-nudges" class="screen">
+      <div class="nav">
+        <div class="nav-logo">45<span>DAYS</span></div>
+        <div class="nav-tabs">
+          <div class="ntab" onclick="go('dashboard',document.querySelectorAll('.step-btn')[2])">Dash</div>
+          <div class="ntab" onclick="go('crew',document.querySelectorAll('.step-btn')[3])">Crew</div>
+          <div class="ntab" onclick="go('board',document.querySelectorAll('.step-btn')[4])">Board</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <div class="nav-bell" style="opacity:.5">🔔</div>
+          <div class="nav-av" style="background:#1a1a2e">A</div>
+        </div>
+      </div>
+      <div class="nudge-feed">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--muted);margin-bottom:.25rem">SHOUTOUTS <span style="font-size:.9rem;color:var(--accent2)">2 NEW</span></div>
+
+        <!-- Unread nudge 1 -->
+        <div class="nudge-card unread">
+          <div class="nudge-top">
+            <div class="nudge-av" style="background:#e85d2f">JO</div>
+            <div>
+              <div class="nudge-who">JORDAN</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted)">Day 12 · 38 min</div>
+            </div>
+            <div class="nudge-meta">2h ago</div>
+          </div>
+          <div class="nudge-workout">🏃 4 mile run — felt strong</div>
+          <div class="nudge-taunt">"Morning run done! Come on crew, let's get it! 🔥"</div>
+        </div>
+
+        <!-- Unread nudge 2 -->
+        <div class="nudge-card unread">
+          <div class="nudge-top">
+            <div class="nudge-av" style="background:#1e8c5a">SA</div>
+            <div>
+              <div class="nudge-who">SAM</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted)">Day 12 · 60 min</div>
+            </div>
+            <div class="nudge-meta">5h ago</div>
+          </div>
+          <div class="nudge-workout">🏋️ Full body circuit — no rest days</div>
+          <div class="nudge-taunt">"Feeling great today — you've got this too! 💪"</div>
+        </div>
+
+        <!-- Read nudge -->
+        <div class="nudge-card">
+          <div class="nudge-top">
+            <div class="nudge-av" style="background:#e85d2f">JO</div>
+            <div>
+              <div class="nudge-who">JORDAN</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted)">Day 11 · 45 min</div>
+            </div>
+            <div class="nudge-meta">Yesterday</div>
+          </div>
+          <div class="nudge-workout">💪 Upper body + core</div>
+          <div class="nudge-taunt">"One more day down. We're all in this together! 🙌"</div>
+        </div>
+
+        <!-- Read nudge, no taunt -->
+        <div class="nudge-card">
+          <div class="nudge-top">
+            <div class="nudge-av" style="background:#1e8c5a">SA</div>
+            <div>
+              <div class="nudge-who">SAM</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted)">Day 10 · 30 min</div>
+            </div>
+            <div class="nudge-meta">2 days ago</div>
+          </div>
+          <div class="nudge-workout">🚴 Spin class</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ⑦ REQUEST A GROUP -->
+    <div id="s-request" class="screen" style="background:linear-gradient(160deg,var(--bg) 60%,#e8e4f8 100%)">
+      <div style="padding:1.75rem 1.5rem;display:flex;flex-direction:column;gap:1rem;flex:1;overflow-y:auto">
+
+        <div style="text-align:center;margin-bottom:.5rem">
+          <div class="ob-logo">45<span>DAYS</span></div>
+          <div class="ob-sub">Request your own challenge group</div>
+        </div>
+
+        <div class="form-card">
+
+          <div style="background:rgba(61,90,241,.06);border:1.5px solid rgba(61,90,241,.2);border-radius:12px;padding:.85rem;margin-bottom:1rem">
+            <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--accent3);letter-spacing:2px;text-transform:uppercase;margin-bottom:.35rem">How it works</div>
+            <div style="font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);line-height:1.8">
+              1. Fill out this form<br>
+              2. Admin reviews &amp; approves<br>
+              3. You become your group's admin<br>
+              4. Invite your people and go
+            </div>
+          </div>
+
+          <div class="fw"><div class="fl">Your Full Name</div><input class="fi" placeholder="e.g. Marcus Johnson" readonly/></div>
+          <div class="fw"><div class="fl">Your Email</div><input class="fi" placeholder="you@email.com" type="email" readonly/></div>
+          <div class="fw"><div class="fl">Group Name</div><input class="fi" placeholder="e.g. Office Grind Squad" readonly/></div>
+          <div class="fw">
+            <div class="fl">Proposed Start Date</div>
+            <input class="fi date-inp" type="date" value="2025-07-01" style="margin-bottom:0"/>
+          </div>
+          <div class="fw">
+            <div class="fl">Challenge Goal <span style="color:var(--muted);font-weight:300">(what's your group working toward?)</span></div>
+            <textarea class="fi fi-ta" placeholder="e.g. Our team wants to collectively lose 100 lbs before the holidays..." readonly></textarea>
+          </div>
+          <div class="fw">
+            <div class="fl">How many people in your group?</div>
+            <input class="fi" placeholder="e.g. 6" type="number" readonly/>
+          </div>
+
+          <button class="btn-go" onclick="showRequestSent()">SUBMIT REQUEST</button>
+        </div>
+
+        <!-- Success state (hidden initially) -->
+        <div id="request-sent" class="hidden" style="background:rgba(30,140,90,.07);border:1.5px solid rgba(30,140,90,.3);border-radius:14px;padding:1.25rem;text-align:center">
+          <div style="font-size:2rem;margin-bottom:.5rem">✅</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--success);margin-bottom:.4rem">Request Sent!</div>
+          <div style="font-family:'Space Mono',monospace;font-size:.68rem;color:var(--muted);line-height:1.7">The admin will review your request. You'll receive an email once it's approved and your group is ready to go.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ⑧ ADMIN: GROUP APPROVALS -->
+    <div id="s-approvals" class="screen">
+      <div class="nav">
+        <div class="nav-logo">45<span>DAYS</span></div>
+        <div class="nav-tabs">
+          <div class="ntab" onclick="go('dashboard',document.querySelectorAll('.step-btn')[2])">Dash</div>
+          <div class="ntab" onclick="go('crew',document.querySelectorAll('.step-btn')[3])">Crew</div>
+          <div class="ntab on" style="background:var(--accent2);border-color:var(--accent2)">Admin</div>
+        </div>
+        <div class="nav-av" style="background:var(--accent2)">A</div>
+      </div>
+      <div class="admin-body">
+
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--muted)">GROUP REQUESTS <span style="color:var(--accent2);font-size:.9rem">2 PENDING</span></div>
+
+        <!-- Pending request 1 -->
+        <div style="background:var(--surface);border:1.5px solid rgba(196,124,0,.3);border-left:3px solid var(--warn);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px">OFFICE GRIND SQUAD</div>
+            <div class="badge badge-warn">PENDING</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem">
+            <div>
+              <div class="date-lbl">Requested By</div>
+              <div style="font-size:.82rem;margin-top:.2rem">Marcus Johnson</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted)">marcus@email.com</div>
+            </div>
+            <div>
+              <div class="date-lbl">Start Date</div>
+              <div style="font-size:.82rem;margin-top:.2rem">July 1, 2025</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted)">6 members</div>
+            </div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .75rem;font-size:.78rem;color:var(--muted);margin-bottom:.85rem;font-family:'Space Mono',monospace;font-size:.65rem;line-height:1.6">
+            "Our team wants to collectively lose 100 lbs before the holidays and build a sustainable gym habit."
+          </div>
+          <div style="display:flex;gap:.5rem">
+            <button class="date-btn-go" style="flex:1;border-radius:10px;font-size:.85rem;padding:.65rem;background:var(--success)" onclick="showApproved()">✓ APPROVE</button>
+            <button class="date-btn-go" style="flex:1;border-radius:10px;font-size:.85rem;padding:.65rem;background:rgba(214,48,48,.1);color:var(--danger);border:1.5px solid rgba(214,48,48,.2)" onclick="hideModals()">✕ DENY</button>
+          </div>
+        </div>
+
+        <!-- Pending request 2 -->
+        <div style="background:var(--surface);border:1.5px solid rgba(196,124,0,.3);border-left:3px solid var(--warn);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px">FIT FAM 2025</div>
+            <div class="badge badge-warn">PENDING</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem">
+            <div>
+              <div class="date-lbl">Requested By</div>
+              <div style="font-size:.82rem;margin-top:.2rem">Tanya Williams</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted)">tanya@email.com</div>
+            </div>
+            <div>
+              <div class="date-lbl">Start Date</div>
+              <div style="font-size:.82rem;margin-top:.2rem">Aug 1, 2025</div>
+              <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted)">4 members</div>
+            </div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .75rem;font-size:.78rem;color:var(--muted);margin-bottom:.85rem;font-family:'Space Mono',monospace;font-size:.65rem;line-height:1.6">
+            "My friends and I want to get summer-ready before our reunion trip in September."
+          </div>
+          <div style="display:flex;gap:.5rem">
+            <button class="date-btn-go" style="flex:1;border-radius:10px;font-size:.85rem;padding:.65rem;background:var(--success)">✓ APPROVE</button>
+            <button class="date-btn-go" style="flex:1;border-radius:10px;font-size:.85rem;padding:.65rem;background:rgba(214,48,48,.1);color:var(--danger);border:1.5px solid rgba(214,48,48,.2)">✕ DENY</button>
+          </div>
+        </div>
+
+        <!-- Approved example -->
+        <div style="background:var(--surface);border:1.5px solid rgba(30,140,90,.2);border-left:3px solid var(--success);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow);opacity:.7">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px">MORNING CREW</div>
+            <div class="badge badge-ok">APPROVED</div>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted)">Chris Davis · 5 members · Started Jun 1</div>
+        </div>
+
+        <!-- Approved confirmation modal -->
+        <div id="modal-approved" class="modal-overlay hidden" onclick="hideApproved()">
+          <div class="modal-box" onclick="event.stopPropagation()" style="text-align:center">
+            <div style="font-size:2.5rem;margin-bottom:.75rem">🎉</div>
+            <div class="modal-title">Group Approved!</div>
+            <div class="modal-sub">Marcus Johnson has been notified and is now the admin of <strong>Office Grind Squad</strong>. They can start inviting their team immediately.</div>
+            <button class="date-btn-go" style="border-radius:10px;margin-top:.5rem" onclick="hideApproved()">DONE</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /phone -->
+</div><!-- /outer -->
+
+<script>
+const descriptions = {
+  login: "First screen anyone sees. Below the magic link form there's a 'Request a Group' button — anyone can ask to run their own challenge without needing an existing invite.",
+  onboard: "One-time profile setup. Includes a 'Your Challenge Group' section so new joiners see exactly who they're up against from day one.",
+  dashboard: "Main daily view. Workout log has an optional shoutout field — drop an uplifting message and it fires to everyone when you log. Bell icon in the nav shows unread shoutouts.",
+  crew: "Public profile cards — everyone reads everyone's goals and approach. Color-coded by profile color, penalty badge shows in red when someone's behind.",
+  board: "Leaderboard sorted by workouts minus penalties. Gold/silver ranks, clean white cards. Red total days show immediately if someone earned a penalty.",
+  admin: "Admin-only tab (sarhaan1104@gmail.com). Stats, invite sender, invite list. Group request approvals live in their own section here.",
+  nudges: "The Shoutouts feed — tap the bell 🔔 from any screen. Unread ones have an orange left border. Pure positive energy — who logged, what they did, and their message to the group.",
+  request: "Public form — no login needed. Anyone who wants to run their own group fills this out. Name, email, group name, start date, goal, and headcount. Submits to the admin queue for approval.",
+  approvals: "Admin-only view of pending group requests. Each card shows the full request — who, what, when, how many people. One tap to Approve (they get notified and become group admin instantly) or Deny."
+};
+
+function go(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`s-${id}`).classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('desc').textContent = descriptions[id] || '';
+  hideModals();
+  document.getElementById('request-sent')?.classList.add('hidden');
+}
+
+function showModal(type) {
+  document.getElementById(`modal-${type}`).classList.remove('hidden');
+}
+
+function hideModals() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+}
+
+function showRequestSent() {
+  document.querySelector('#s-request .form-card').style.display = 'none';
+  document.getElementById('request-sent').classList.remove('hidden');
+}
+
+function showApproved() {
+  document.getElementById('modal-approved').classList.remove('hidden');
+}
+
+function hideApproved() {
+  document.getElementById('modal-approved').classList.add('hidden');
+}
+
+function showConfirm(scope, action) {
+  const isGroup = scope === 'group';
+  const isWipe  = action === 'clear';
+  document.getElementById('confirm-icon').textContent = isWipe ? '⚠️' : '📅';
+  document.getElementById('confirm-title').textContent = isGroup ? 'Reset group date?' : 'Change your date?';
+  document.getElementById('confirm-sub').textContent = isWipe
+    ? (isGroup ? 'All workouts and weights for every member will be permanently deleted.' : 'Your workout and weight history will be permanently deleted.')
+    : (isGroup ? 'All clocks reset to the new date. Existing logs are kept.' : 'Your clock resets. Your existing logs are kept.');
+  document.getElementById('modal-confirm').classList.remove('hidden');
+}
+
+// Build day map
+const map = document.getElementById('map');
+const loggedDays = new Set([3,5,7,9,11,12]);
+for (let d = 1; d <= 45; d++) {
+  const div = document.createElement('div');
+  div.className = 'dot' + (loggedDays.has(d) ? ' on' : d === 12 ? ' now' : d > 12 ? ' dim' : '');
+  div.title = `Day ${d}`;
+  map.appendChild(div);
+}
+</script>
+</body>
+</html>

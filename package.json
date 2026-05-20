@@ -1,0 +1,9 @@
+{
+  "name": "fitness-45",
+  "version": "1.0.0",
+  "description": "45-Day Fitness Challenge Tracker",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}
