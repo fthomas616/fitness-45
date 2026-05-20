@@ -236,10 +236,20 @@
     <div id="auth-form">
       <div class="auth-label">Your email address</div>
       <input id="auth-email" class="auth-input" type="email" placeholder="you@example.com" autocomplete="email"/>
-      <button class="btn btn-primary" onclick="sendMagicLink()">
+      <div id="auth-pin-wrap" class="hidden">
+        <div class="auth-label" style="margin-top:.75rem">4-Digit PIN</div>
+        <input id="auth-pin" class="auth-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="• • • •" style="letter-spacing:.5rem;text-align:center"/>
+      </div>
+      <button id="auth-magic-btn" class="btn btn-primary" onclick="sendMagicLink()">
         <span id="auth-btn-text">SEND MAGIC LINK</span>
       </button>
-      <p class="auth-note">Enter the email your invite was sent to. We'll send a one-click login link — no password needed.</p>
+      <button id="auth-pin-btn" class="btn btn-primary hidden" onclick="signInWithPin()">
+        <span id="auth-pin-btn-text">SIGN IN</span>
+      </button>
+      <p class="auth-note" id="auth-note">Enter the email your invite was sent to. We'll send a one-click login link — no password needed.</p>
+      <button class="btn btn-secondary" style="margin-top:.75rem;width:100%" onclick="toggleAuthMode()">
+        <span id="auth-toggle-text">USE 4-DIGIT PIN INSTEAD</span>
+      </button>
     </div>
     <div id="auth-sent" class="auth-success hidden">
       ✓ Magic link sent! Check your email and click the link to log in.
@@ -274,6 +284,10 @@
       <div class="field">
         <label>Profile Color</label>
         <div class="color-picker" id="color-picker"></div>
+      </div>
+      <div class="field">
+        <label>4-Digit PIN <span id="ob-pin-hint" style="color:var(--muted);font-weight:300">(used to sign in without email)</span></label>
+        <input id="ob-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="• • • •" style="letter-spacing:.5rem;text-align:center"/>
       </div>
       <button class="btn btn-primary" style="margin-top:.5rem" onclick="saveProfile()">
         <span id="ob-btn-text">START MY CHALLENGE</span>
@@ -435,6 +449,26 @@ async function sendMagicLink(){
 
 async function signOut(){await sb.auth.signOut();location.reload();}
 
+function toggleAuthMode(){
+  const pinMode=!document.getElementById('auth-pin-wrap').classList.contains('hidden')?false:true;
+  document.getElementById('auth-pin-wrap').classList.toggle('hidden',!pinMode);
+  document.getElementById('auth-magic-btn').classList.toggle('hidden',pinMode);
+  document.getElementById('auth-pin-btn').classList.toggle('hidden',!pinMode);
+  document.getElementById('auth-toggle-text').textContent=pinMode?'USE MAGIC LINK INSTEAD':'USE 4-DIGIT PIN INSTEAD';
+  document.getElementById('auth-note').textContent=pinMode?'Enter your email and the 4-digit PIN you set during signup.':'Enter the email your invite was sent to. We\'ll send a one-click login link — no password needed.';
+}
+
+async function signInWithPin(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pin=document.getElementById('auth-pin').value.trim();
+  if(!email)return toast('Enter your email','err');
+  if(!/^\d{4}$/.test(pin))return toast('Enter your 4-digit PIN','err');
+  document.getElementById('auth-pin-btn-text').innerHTML='<span class="spinner"></span>';
+  const{error}=await sb.auth.signInWithPassword({email,password:padPin(pin)});
+  document.getElementById('auth-pin-btn-text').textContent='SIGN IN';
+  if(error)return toast('Invalid email or PIN','err');
+}
+
 function normalizeColor(c){
   if(!c)return '';
   const s=String(c).trim().toLowerCase();
@@ -455,6 +489,8 @@ function openProfileEditor(){
   document.getElementById('ob-goal').value=myProfile.goal||'';
   document.getElementById('ob-approach').value=myProfile.approach||'';
   document.getElementById('ob-weight').value=myProfile.start_weight??'';
+  document.getElementById('ob-pin').value='';
+  document.getElementById('ob-pin-hint').textContent='(leave blank to keep current PIN)';
   buildColorPicker(myProfile.avatar_color);
   document.getElementById('ob-subtitle').textContent='Update your profile details.';
   document.getElementById('ob-btn-text').textContent='SAVE CHANGES';
@@ -469,20 +505,30 @@ function getSelectedColor(){
   const s=document.querySelector('.color-swatch.selected');return s?(s.dataset.color||s.style.background):AVATAR_COLORS[0];
 }
 
+function padPin(pin){return `f45.${pin}.pwd`;}
+
 async function saveProfile(){
   const name=document.getElementById('ob-name').value.trim();
   const goal=document.getElementById('ob-goal').value.trim();
   const approach=document.getElementById('ob-approach').value.trim();
   const weight=parseFloat(document.getElementById('ob-weight').value)||null;
   const color=getSelectedColor();
+  const pin=document.getElementById('ob-pin').value.trim();
   if(!name||!goal)return toast('Name and goal are required','err');
   const editing=!!myProfile;
+  if(!editing&&!/^\d{4}$/.test(pin))return toast('Please set a 4-digit PIN','err');
+  if(pin&&!/^\d{4}$/.test(pin))return toast('PIN must be 4 digits','err');
   const btnLabel=editing?'SAVE CHANGES':'START MY CHALLENGE';
   document.getElementById('ob-btn-text').innerHTML='<span class="spinner"></span>';
   const token=currentToken;
   const res=await fetch('/api/profiles',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({display_name:name,goal,approach,avatar_color:color,start_weight:weight})});
   document.getElementById('ob-btn-text').textContent=btnLabel;
   if(!res.ok){const e=await res.json();return toast(e.error,'err');}
+  if(pin){
+    const{error:pwErr}=await sb.auth.updateUser({password:padPin(pin)});
+    if(pwErr)toast('Profile saved, but PIN update failed: '+pwErr.message,'err');
+  }
+  document.getElementById('ob-pin').value='';
   toast(editing?'Profile updated':'Profile saved! Welcome to the challenge 💪');
   await loadApp();
 }
@@ -523,6 +569,8 @@ async function loadApp(){
     document.getElementById('ob-goal').value='';
     document.getElementById('ob-approach').value='';
     document.getElementById('ob-weight').value='';
+    document.getElementById('ob-pin').value='';
+    document.getElementById('ob-pin-hint').textContent='(used to sign in without email)';
     document.getElementById('ob-subtitle').textContent='Set up your profile to begin the challenge.';
     document.getElementById('ob-btn-text').textContent='START MY CHALLENGE';
     document.getElementById('ob-cancel').classList.add('hidden');
