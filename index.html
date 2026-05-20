@@ -37,7 +37,7 @@
     .view.active{display:flex;flex-direction:column}
 
     /* ── AUTH ── */
-    #view-auth{align-items:center;justify-content:center;padding:2rem;
+    #view-auth{align-items:center;justify-content:center;padding:2rem;position:relative;
       background: linear-gradient(160deg,#f5f4f0 60%,#e8e4f8 100%)}
     .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;
       padding:3rem 2.5rem;max-width:440px;width:100%;text-align:center;
@@ -175,6 +175,12 @@
     .day-dot.penalty{outline:1px dashed rgba(214,48,48,.5);background:rgba(214,48,48,.08);border-color:rgba(214,48,48,.2);color:var(--danger)}
     .day-dot.penalty.logged{background:var(--accent3);border-color:var(--accent3);color:#fff;outline:1px dashed rgba(214,48,48,.5)}
 
+    /* ── AUTH GEAR ── */
+    .auth-gear{position:absolute;left:1rem;bottom:1rem;width:32px;height:32px;border-radius:50%;
+      background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;
+      opacity:.4;transition:opacity .15s,transform .25s}
+    .auth-gear:hover{opacity:1;transform:rotate(60deg)}
+
     /* ── iOS INSTALL HINT ── */
     .ios-hint{position:fixed;left:1rem;right:1rem;bottom:1rem;background:var(--surface);
       border:1.5px solid var(--border);border-radius:14px;padding:.85rem 1rem;
@@ -248,6 +254,7 @@
       ✓ Magic link sent! Check your email and click the link to log in.
     </div>
   </div>
+  <button class="auth-gear" title="Admin sign-in" onclick="adminPinLogin()">⚙</button>
 </div>
 
 <!-- ══ ONBOARDING ══ -->
@@ -448,6 +455,15 @@ function toggleAuthMode(){
   document.getElementById('auth-pin-btn').classList.toggle('hidden',!pinMode);
   document.getElementById('auth-toggle-text').textContent=pinMode?'USE MAGIC LINK INSTEAD':'USE 4-DIGIT PIN INSTEAD';
   document.getElementById('auth-note').textContent=pinMode?'Enter your email and the 4-digit PIN you set during signup.':'Enter the email your invite was sent to. We\'ll send a one-click login link — no password needed.';
+}
+
+async function adminPinLogin(){
+  const pin=prompt('Admin PIN:');
+  if(!pin)return;
+  const res=await fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin})});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok){toast(data.error||'Invalid PIN','err');return;}
+  location.href=data.action_link;
 }
 
 async function signInWithPin(){
