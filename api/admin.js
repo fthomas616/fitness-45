@@ -43,17 +43,16 @@ export default async function handler(req, res) {
   }
 
   // DELETE /api/admin?invite_id=xxx — revoke invite
-  // DELETE /api/admin?user_id=xxx — wipe member's profile, workouts, weights (auth user kept so they can re-login)
+  // DELETE /api/admin?user_id=xxx — delete the auth user; FK cascade removes profile, workouts, weights
   if (req.method === 'DELETE') {
     const { invite_id, user_id } = req.query;
     if (user_id) {
-      const [profErr, wkErr, wtErr] = await Promise.all([
-        supabase.from('profiles').delete().eq('user_id', user_id),
-        supabase.from('workouts').delete().eq('user_id', user_id),
-        supabase.from('weights').delete().eq('user_id', user_id)
-      ]).then(rs => rs.map(r => r.error));
-      const err = profErr || wkErr || wtErr;
-      if (err) return res.status(500).json({ error: err.message });
+      if (user.id === user_id) return res.status(400).json({ error: 'Cannot delete yourself' });
+      const target = await supabase.auth.admin.getUserById(user_id).catch(() => null);
+      const email = target?.data?.user?.email;
+      const { error } = await supabase.auth.admin.deleteUser(user_id);
+      if (error) return res.status(500).json({ error: error.message });
+      if (email) await supabase.from('invites').delete().eq('email', email.toLowerCase());
       return res.status(200).json({ success: true });
     }
     if (invite_id) {
