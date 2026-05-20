@@ -183,14 +183,7 @@
     .ios-hint b{color:var(--accent2)}
     .ios-hint button{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:.25rem .5rem;line-height:1}
 
-    /* ── ADMIN FAB ── */
-    .admin-fab{position:fixed;left:1rem;bottom:1rem;width:42px;height:42px;border-radius:50%;
-      background:var(--surface);border:1.5px solid var(--border);cursor:pointer;
-      display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-      box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:40;transition:transform .15s,background .15s}
-    .admin-fab:hover{transform:rotate(45deg);background:var(--surface2)}
-
-    /* ── LEADERBOARD ── */
+/* ── LEADERBOARD ── */
     .lb-row{display:flex;align-items:center;gap:1rem;padding:.85rem 1rem;
       background:var(--surface);border:1.5px solid var(--border);border-radius:12px;margin-bottom:.5rem;
       box-shadow:var(--card-shadow)}
@@ -404,7 +397,6 @@
       <div id="admin-members"><div class="empty-msg">Loading…</div></div>
     </div>
   </div>
-  <button id="admin-fab" class="admin-fab hidden" title="Admin" onclick="openAdmin(document.getElementById('nav-admin'))">⚙️</button>
 </div>
 
 <div id="toast"></div>
@@ -584,7 +576,6 @@ async function loadApp(){
   myWeights=wtRes.ok?await wtRes.json():[];
   if(currentUser.email===ADMIN_EMAIL){
     document.getElementById('nav-admin').classList.remove('hidden');
-    document.getElementById('admin-fab').classList.remove('hidden');
   }
   const av=document.getElementById('nav-avatar');
   av.style.background=myProfile.avatar_color;
@@ -773,7 +764,16 @@ async function loadAdmin(){
       <div class="invite-email">${esc(u.email)}</div>
       <div class="status-badge badge-active">registered</div>
       <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted)">Last: ${u.last_sign_in?new Date(u.last_sign_in).toLocaleDateString():'never'}</span>
+      ${u.email===ADMIN_EMAIL?'':`<button class="del-btn" title="Wipe profile, workouts, weights" onclick="deleteMember('${u.id}','${esc(u.email)}')">✕</button>`}
     </div>`).join(''):'<div class="empty-msg">No members yet.</div>';
+}
+
+async function deleteMember(userId,email){
+  if(!confirm(`Wipe ${email}'s profile, workouts, and weights?\n\nThey'll see the onboarding screen next time they sign in and can recreate their profile.`))return;
+  const token=currentToken;
+  const res=await fetch(`/api/admin?user_id=${encodeURIComponent(userId)}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});
+  if(!res.ok)return toast('Failed to delete member data','err');
+  toast(`${email}'s data cleared`);loadAdmin();
 }
 
 async function sendInvite(){
