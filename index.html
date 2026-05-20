@@ -277,7 +277,7 @@
       <button class="nav-link active" onclick="showTab('dashboard',this)">Dashboard</button>
       <button class="nav-link" onclick="showTab('community',this)">Crew</button>
       <button class="nav-link" onclick="showTab('leaderboard',this)">Board</button>
-      <button class="nav-link hidden" id="nav-admin" onclick="showTab('admin',this)">Admin</button>
+      <button class="nav-link hidden" id="nav-admin" onclick="openAdmin(this)">Admin</button>
     </div>
     <div class="nav-user">
       <span id="nav-name" style="display:none"></span>
@@ -376,7 +376,7 @@
       <div id="admin-members"><div class="empty-msg">Loading…</div></div>
     </div>
   </div>
-  <button id="admin-fab" class="admin-fab hidden" title="Admin" onclick="document.getElementById('nav-admin').click()">⚙️</button>
+  <button id="admin-fab" class="admin-fab hidden" title="Admin" onclick="openAdmin(document.getElementById('nav-admin'))">⚙️</button>
 </div>
 
 <div id="toast"></div>
@@ -386,6 +386,7 @@
 const SUPABASE_URL  = 'https://tkwtjmozspszghybdvxg.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_kfidDWgicwNkI9KL06NW3g_Vtw0GE5Z';
 const ADMIN_EMAIL   = 'fthomas219@hotmail.com';
+const ADMIN_PIN     = '370321';
 const START_DATE    = '2026-06-01';
 const WEEK_MIN      = 3;
 const PENALTY_DAYS  = 5;
@@ -709,6 +710,13 @@ async function sendInvite(){
   if(!res.ok)return toast(data.error||'Failed to send invite','err');
   toast(`Invite sent to ${email} ✓`);
   document.getElementById('invite-email').value='';loadAdmin();
+}
+
+function openAdmin(navBtn){
+  const entered=prompt('Enter admin PIN:');
+  if(entered===null)return;
+  if(entered!==ADMIN_PIN){toast('Incorrect PIN','err');return;}
+  showTab('admin',navBtn);
 }
 
 function showTab(name,btn){
