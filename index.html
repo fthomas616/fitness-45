@@ -800,6 +800,11 @@ async function loadLeaderboard(){
   const el=document.getElementById('leaderboard-list');
   el.innerHTML=scored.length?scored.map((p,i)=>{
     const textColor=isLight(p.avatar_color)?'#1a1a2e':'#fff';
+    const remaining=45-day+1;
+    let countTxt,countColor;
+    if(remaining>0){countTxt=remaining+'d';countColor=p.penaltyDays>0?'var(--warn)':'var(--accent)';}
+    else if(p.penaltyDays>0){countTxt='-'+p.penaltyDays;countColor='var(--danger)';}
+    else{countTxt='✓';countColor='var(--success)';}
     return`<div class="lb-row">
       <div class="lb-rank ${ranks[i]||''}">${i+1}</div>
       <div class="avatar-dot" style="background:${p.avatar_color};color:${textColor};border-color:${p.avatar_color}">${p.display_name.charAt(0).toUpperCase()}</div>
@@ -808,7 +813,7 @@ async function loadLeaderboard(){
         <div class="lb-sub">${p.wkCount} workout${p.wkCount!==1?'s':''} logged</div>
       </div>
       <div class="lb-stats">
-        <div class="lb-count" style="color:${p.penaltyDays>0?'var(--danger)':'var(--accent)'}">${45+p.penaltyDays}d</div>
+        <div class="lb-count" style="color:${countColor}">${countTxt}</div>
         ${p.penaltyDays>0?`<div class="lb-penalty">+${p.penaltyDays} penalty</div>`:''}
       </div>
     </div>`;}).join(''):'<div class="empty-msg">No data yet.</div>';
