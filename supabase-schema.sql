@@ -66,3 +66,14 @@ CREATE POLICY "weights_update" ON weights FOR UPDATE USING (auth.uid() = user_id
 
 -- Invites: only service role can access (admin API handles this)
 ALTER TABLE invites ENABLE ROW LEVEL SECURITY;
+
+-- Challenge settings (single-row table holding the current start date)
+CREATE TABLE IF NOT EXISTS challenge_settings (
+  id         INTEGER PRIMARY KEY CHECK (id = 1),
+  start_date DATE NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+INSERT INTO challenge_settings (id, start_date) VALUES (1, '2026-06-01')
+  ON CONFLICT (id) DO NOTHING;
+ALTER TABLE challenge_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "settings_read" ON challenge_settings FOR SELECT USING (auth.uid() IS NOT NULL);

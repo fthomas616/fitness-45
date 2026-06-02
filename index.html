@@ -121,10 +121,10 @@
     .profile-section-label{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:2px;
       color:var(--muted);text-transform:uppercase;margin-bottom:.4rem}
     .profile-text{color:var(--text);font-size:.9rem;line-height:1.65}
-    .profile-stats{display:flex;gap:1.5rem;flex-wrap:wrap}
-    .p-stat{display:flex;flex-direction:column;gap:.15rem}
-    .p-stat-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1}
-    .p-stat-lbl{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase}
+    .profile-stats{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center}
+    .p-stat{display:flex;flex-direction:column;gap:.15rem;text-align:center;align-items:center}
+    .p-stat-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;text-align:center}
+    .p-stat-lbl{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;text-align:center}
 
     /* ── DASHBOARD ── */
     .progress-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:.75rem}
@@ -349,6 +349,7 @@
       <span id="nav-name" style="display:none"></span>
       <div class="avatar-dot" id="nav-avatar" style="cursor:pointer" title="Edit profile" onclick="openProfileEditor()"></div>
       <button class="btn btn-secondary btn-sm" onclick="openProfileEditor()">EDIT</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportMyData()" title="Download my data">SAVE</button>
       <button class="btn btn-secondary btn-sm" onclick="signOut()">OUT</button>
     </div>
   </nav>
@@ -442,6 +443,17 @@
       <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:1rem">Registered Members</div>
       <div id="admin-members"><div class="empty-msg">Loading…</div></div>
     </div>
+    <div class="card" style="margin-top:1rem;border-color:rgba(214,48,48,.3)">
+      <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:2px;color:var(--danger);text-transform:uppercase;margin-bottom:.5rem">Reset Challenge</div>
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;line-height:1.6">
+        Resets Day 1 for everyone and wipes all workouts, weights, and starting weights.
+        Profiles, goals, and PINs are kept. Current start: <strong id="admin-start-date" style="color:var(--text)">—</strong>
+      </div>
+      <div class="input-row" style="margin-top:0">
+        <input class="mini-input" id="reset-date" type="date" style="font-family:'DM Sans',sans-serif"/>
+        <button class="btn-log" style="background:var(--danger)" onclick="resetChallenge()">RESET</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -457,7 +469,7 @@ const SUPABASE_URL  = 'https://tkwtjmozspszghybdvxg.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_kfidDWgicwNkI9KL06NW3g_Vtw0GE5Z';
 const ADMIN_EMAIL   = 'fthomas219@hotmail.com';
 const ADMIN_PIN     = '370321';
-const START_DATE    = '2026-06-01';
+let START_DATE      = '2026-06-01'; // fallback; overwritten from /api/settings on load
 const WEEK_MIN      = 3;
 const PENALTY_DAYS  = 5;
 const AVATAR_COLORS = ['#1a1a2e','#3d5af1','#e85d2f','#1e8c5a','#7b3fa0','#c47c00','#d63030','#0a7ea4'];
@@ -621,6 +633,8 @@ function showView(v){
 
 async function loadApp(){
   const token=currentToken;
+  const settingsRes=await fetch('/api/settings',{headers:{Authorization:`Bearer ${token}`}});
+  if(settingsRes.ok){const s=await settingsRes.json();if(s.start_date)START_DATE=s.start_date;}
   const profRes=await fetch('/api/profiles',{headers:{Authorization:`Bearer ${token}`}});
   if(!profRes.ok){showView('auth');return;}
   allProfiles=await profRes.json();
@@ -657,7 +671,42 @@ async function loadApp(){
   av.textContent=myProfile.display_name.charAt(0).toUpperCase();
   document.getElementById('nav-name').textContent=myProfile.display_name;
   document.getElementById('nav-name').style.display='block';
-  showView('app');renderDashboard();
+  showView('app');renderDashboard();maybeOfferExport();
+}
+
+function maybeOfferExport(){
+  const day=getCurrentDay();
+  if(day<43)return;
+  const key=`acc_export_offered_${START_DATE}`;
+  if(localStorage.getItem(key)==='1')return;
+  setTimeout(()=>{
+    const ok=confirm(`Day ${day} of 45 — the challenge is almost over!\n\nWant to save a copy of your workouts and weight log to a file before a new challenge starts?\n\nYou can always do this again from your profile.`);
+    localStorage.setItem(key,'1');
+    if(ok)exportMyData();
+  },800);
+}
+
+function exportMyData(){
+  const data={
+    exported_at:new Date().toISOString(),
+    challenge_start:START_DATE,
+    profile:myProfile?{
+      display_name:myProfile.display_name,
+      goal:myProfile.goal,
+      approach:myProfile.approach,
+      start_weight:myProfile.start_weight
+    }:null,
+    workouts:myWorkouts.map(w=>({day:w.day,description:w.description,duration_min:w.duration_min,logged_at:w.logged_at})),
+    weights:myWeights.map(w=>({day:w.day,value:w.value,logged_at:w.logged_at}))
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const name=(myProfile?.display_name||'me').replace(/\s+/g,'_').toLowerCase();
+  a.href=url;a.download=`45days_${name}_${START_DATE}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('Data downloaded ✓');
 }
 
 function isLight(hex){
@@ -832,6 +881,7 @@ async function loadAdmin(){
   const res=await fetch('/api/admin',{headers:{Authorization:`Bearer ${token}`}});
   if(!res.ok)return toast('Admin load failed','err');
   const{invites,users}=await res.json();
+  document.getElementById('admin-start-date').textContent=START_DATE;
   document.getElementById('admin-invites').innerHTML=invites.length?invites.map(inv=>`
     <div class="invite-row">
       <div class="invite-email">${esc(inv.email)}</div>
@@ -865,6 +915,21 @@ async function deleteMember(userId,email){
   const res=await fetch(`/api/admin?user_id=${encodeURIComponent(userId)}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});
   if(!res.ok){const d=await res.json().catch(()=>({}));return toast(d.error||'Failed to delete user','err');}
   toast(`${email} deleted`);loadAdmin();
+}
+
+async function resetChallenge(){
+  const newDate=document.getElementById('reset-date').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate))return toast('Pick a valid start date','err');
+  if(!confirm(`RESET the 45-day challenge for everyone?\n\nNew start date: ${newDate}\n\nThis wipes ALL workouts, ALL weight entries, and clears every starting weight.\nProfiles, goals, and PINs are kept.\n\nThis cannot be undone.`))return;
+  const token=currentToken;
+  const res=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({start_date:newDate})});
+  if(!res.ok){const d=await res.json().catch(()=>({}));return toast(d.error||'Reset failed','err');}
+  toast('Challenge reset ✓');
+  START_DATE=newDate;
+  myWorkouts=[];myWeights=[];
+  if(myProfile)myProfile.start_weight=null;
+  document.getElementById('admin-start-date').textContent=START_DATE;
+  document.getElementById('reset-date').value='';
 }
 
 async function sendInvite(){
