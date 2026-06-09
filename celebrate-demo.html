@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Celebrate Demo</title>
+<style>
+  :root{--accent:#3d5af1;--accent2:#e85d2f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0f0f1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:20px;font-family:Arial,sans-serif}
+  h2{color:#aaa;font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+  .btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+  button{padding:14px 32px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s}
+  #btn-current{background:#1e1e35;color:#aaa;border:1.5px solid #333}
+  #btn-current:hover{border-color:#555;color:#ccc}
+  #btn-new{background:#e85d2f;color:#fff}
+  #btn-new:hover{background:#ff6b3d}
+  p{color:#555;font-size:12px}
+
+  /* CELEBRATE */
+  #celebrate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9998}
+  .celebrate-text{font-family:'Arial Black','Helvetica Neue',sans-serif;font-weight:900;
+    font-size:clamp(2rem,10vw,5rem);letter-spacing:.1em;line-height:.95;color:var(--accent2);
+    text-shadow:0 4px 24px rgba(232,93,47,.45),0 0 2px var(--accent);
+    transform:scale(0);opacity:0;text-align:center;-webkit-text-stroke:1.5px var(--accent)}
+  .celebrate-text span{display:block}
+  .celebrate-text.in{animation:popIn .55s cubic-bezier(.2,1.6,.4,1) forwards}
+  .celebrate-text.out{animation:popOut .5s ease-in forwards}
+  @keyframes popIn{
+    0%{transform:scale(0) rotate(-12deg);opacity:0}
+    60%{transform:scale(1.15) rotate(3deg);opacity:1}
+    100%{transform:scale(1) rotate(0);opacity:1}
+  }
+  @keyframes popOut{
+    0%{transform:scale(1);opacity:1}
+    100%{transform:scale(2.2);opacity:0}
+  }
+</style>
+</head>
+<body>
+  <h2>Workout Completion Animation</h2>
+  <div class="btns">
+    <button id="btn-current">Current: YOU / DID / IT!!!</button>
+    <button id="btn-new">New: WINNING!!!</button>
+  </div>
+  <p>Click either button to preview the animation</p>
+
+<script>
+function drawStar(ctx,r){
+  const spikes=5,inner=r*0.45;
+  ctx.beginPath();
+  for(let i=0;i<spikes*2;i++){
+    const rad=i%2===0?r:inner;
+    const a=(i*Math.PI)/spikes - Math.PI/2;
+    const x=Math.cos(a)*rad,y=Math.sin(a)*rad;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+}
+
+function fireConfetti(opts={}){
+  const cv=document.createElement('canvas');
+  cv.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:9999';
+  document.body.appendChild(cv);
+  const dpr=window.devicePixelRatio||1;
+  const W=innerWidth,H=innerHeight;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const colors=['#e85d2f','#3d5af1','#1e8c5a','#c47c00','#7b3fa0','#1a1a2e','#d63030','#f4c430'];
+  const N=opts.count||180;
+  const ox=opts.x??W/2, oy=opts.y??H/2;
+  const spread=opts.spread??Math.PI*2;
+  const baseAngle=opts.angle??-Math.PI/2;
+  const minSpd=opts.minSpeed??6, maxSpd=opts.maxSpeed??16;
+  const gravity=opts.gravity??0.28;
+  const life=opts.life??2400;
+  const parts=[];
+  for(let i=0;i<N;i++){
+    const angle=baseAngle+(Math.random()-.5)*spread;
+    const speed=minSpd+Math.random()*(maxSpd-minSpd);
+    parts.push({
+      x:ox+(Math.random()-.5)*40,y:oy+(Math.random()-.5)*40,
+      vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,
+      g:gravity+Math.random()*0.1,
+      r:7+Math.random()*7,
+      rot:Math.random()*Math.PI,vr:(Math.random()-.5)*0.35,
+      color:colors[i%colors.length]
+    });
+  }
+  const start=performance.now();
+  function tick(now){
+    const t=now-start;
+    ctx.clearRect(0,0,W,H);
+    parts.forEach(p=>{
+      p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+      ctx.globalAlpha=Math.max(0,1-t/life);
+      ctx.fillStyle=p.color;
+      drawStar(ctx,p.r);ctx.fill();
+      ctx.restore();
+    });
+    if(t<life)requestAnimationFrame(tick);else cv.remove();
+  }
+  requestAnimationFrame(tick);
+}
+
+function celebrate(html){
+  document.getElementById('celebrate')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='celebrate';
+  const txt=document.createElement('div');
+  txt.className='celebrate-text in';
+  txt.innerHTML=html;
+  overlay.appendChild(txt);
+  document.body.appendChild(overlay);
+  fireConfetti({count:70,x:innerWidth/2,y:innerHeight/2,spread:Math.PI*2,minSpeed:3,maxSpeed:7,gravity:0.15,life:1400});
+  setTimeout(()=>{
+    txt.classList.remove('in');txt.classList.add('out');
+    fireConfetti({count:180,x:innerWidth/2,y:innerHeight/2,spread:Math.PI*2,minSpeed:8,maxSpeed:20,gravity:0.32,life:2400});
+  },900);
+  setTimeout(()=>overlay.remove(),1500);
+}
+
+document.getElementById('btn-current').onclick=()=>celebrate('<span>YOU</span><span>DID</span><span>IT!!!</span>');
+document.getElementById('btn-new').onclick=()=>celebrate('<span>WINNING!!!</span>');
+</script>
+</body>
+</html>
