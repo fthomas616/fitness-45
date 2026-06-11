@@ -230,9 +230,9 @@
     /* ── CELEBRATE ── */
     #celebrate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9998}
     .celebrate-text{font-family:'Arial Black','Helvetica Neue',sans-serif;font-weight:900;
-      font-size:clamp(2rem,7vw,4rem);letter-spacing:.1em;line-height:.95;color:var(--accent2);
-      text-shadow:0 4px 24px rgba(232,93,47,.45),0 0 2px var(--accent);
-      transform:scale(0);opacity:0;text-align:center;-webkit-text-stroke:1.5px var(--accent)}
+      font-size:clamp(2rem,7vw,4rem);letter-spacing:.1em;line-height:.95;color:#1ec94a;
+      text-shadow:0 4px 24px rgba(30,201,74,.45),0 0 2px #ffe600;
+      transform:scale(0);opacity:0;text-align:center;-webkit-text-stroke:1.5px #ffe600}
     .celebrate-text span{display:block}
     .celebrate-text.in{animation:popIn .55s cubic-bezier(.2,1.6,.4,1) forwards}
     .celebrate-text.out{animation:popOut .5s ease-in forwards}
@@ -1047,7 +1047,7 @@ function celebrate(){
   overlay.id='celebrate';
   const txt=document.createElement('div');
   txt.className='celebrate-text in';
-  txt.innerHTML='<span>YOU</span><span>DID</span><span>IT!!!</span>';
+  txt.innerHTML='<span>WINNING</span>';
   overlay.appendChild(txt);
   document.body.appendChild(overlay);
   fireConfetti({count:70,x:innerWidth/2,y:innerHeight/2,spread:Math.PI*2,

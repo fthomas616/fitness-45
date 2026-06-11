@@ -20,9 +20,9 @@
   /* CELEBRATE */
   #celebrate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9998}
   .celebrate-text{font-family:'Arial Black','Helvetica Neue',sans-serif;font-weight:900;
-    font-size:clamp(2rem,10vw,5rem);letter-spacing:.1em;line-height:.95;color:var(--accent2);
-    text-shadow:0 4px 24px rgba(232,93,47,.45),0 0 2px var(--accent);
-    transform:scale(0);opacity:0;text-align:center;-webkit-text-stroke:1.5px var(--accent)}
+    font-size:clamp(2rem,10vw,5rem);letter-spacing:.1em;line-height:.95;color:#1ec94a;
+    text-shadow:0 4px 24px rgba(30,201,74,.45),0 0 2px #ffe600;
+    transform:scale(0);opacity:0;text-align:center;-webkit-text-stroke:1.5px #ffe600}
   .celebrate-text span{display:block}
   .celebrate-text.in{animation:popIn .55s cubic-bezier(.2,1.6,.4,1) forwards}
   .celebrate-text.out{animation:popOut .5s ease-in forwards}
@@ -40,10 +40,9 @@
 <body>
   <h2>Workout Completion Animation</h2>
   <div class="btns">
-    <button id="btn-current">Current: YOU / DID / IT!!!</button>
-    <button id="btn-new">New: WINNING!!!</button>
+    <button id="btn-new">Demo: WINNING</button>
   </div>
-  <p>Click either button to preview the animation</p>
+  <p>Click to preview the animation</p>
 
 <script>
 function drawStar(ctx,r){
@@ -121,8 +120,7 @@ function celebrate(html){
   setTimeout(()=>overlay.remove(),1500);
 }
 
-document.getElementById('btn-current').onclick=()=>celebrate('<span>YOU</span><span>DID</span><span>IT!!!</span>');
-document.getElementById('btn-new').onclick=()=>celebrate('<span>WINNING!!!</span>');
+document.getElementById('btn-new').onclick=()=>celebrate('<span>WINNING</span>');
 </script>
 </body>
 </html>
